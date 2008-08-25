@@ -1,0 +1,187 @@
+#!/bin/sh
+#
+# Bro - Open-source, Unix-based Network Intrusion Detection System
+#
+# chkconfig:   - 57 30
+# description: Bro is an open-source, Unix-based Network Intrusion Detection System (NIDS)      \
+#              that passively monitors network traffic and looks for suspicious activity.
+#
+
+### BEGIN INIT INFO
+# Provides: 
+# Required-Start: 
+# Required-Stop: 
+# Should-Start: 
+# Should-Stop: 
+# Default-Start: 
+# Default-Stop: 
+# Short-Description: 
+# Description:      
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+exec="/usr/bin/bro"
+prog="bro"
+config="/etc/sysconfig/bro"
+syslog_cmd="logger"
+
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+lockfile=/var/lock/subsys/$prog
+
+fexists () {
+    [ -f "${1}" ] || exit 1
+    exit 0
+}
+
+dexists () {
+    [ -d "${1}" ] || exit 1
+    exit 0
+}
+
+start() {
+    [ -x $exec ] || exit 5
+     
+    [[ -f "${config}"         && \
+      -w "${BROLOGS}"         && \
+      -d "${BRO_BIN_DIR}"     && \
+      -d "${BRO_LOG_ARCHIVE}" && \
+      -d "${BRO_SIG_DIR}"     && \
+      -d "${BROSITE}"         && \
+      -d "${BROHOST}"         && \
+      -f "${BRO}" ]] || exit 6
+
+    local current_date
+    local trace_file
+    local cmd_opts
+    
+    cmd_opts="${BRO_OPTS}"
+    current_date="$(date +%y-%m-%d_%H.%M.%S)"
+    export \
+	BRO_LOG_SUFFIX="${BRO_HOSTNAME}.${current_date}"
+
+    trace_file="${BROLOGS}/trace.${BRO_LOG_SUFFIX}"
+    info_file="${BROLOGS}/info.${BRO_LOG_SUFFIX}"
+    
+    if [ "${BRO_CREATE_TRACE_FILE}" = 'YES' -o "${BRO_CREATE_TRACE_FILE}" = 'yes' ]; then
+	cmd_opts="${cmd_opts} -w \"${trace_file}\""
+    fi
+
+    if [ -n "${BRO_CAPTURE_INTERFACE}" ]; then
+	for _intf in ${BRO_CAPTURE_INTERFACE}; do
+	    cmd_opts="${cmd_opts} -i ${_intf}"
+	done
+    fi
+
+    if [ -n "${BRO_START_POLICY}" ]; then
+	cmd_opts="${cmd_opts} ${BRO_START_POLICY}"
+    else
+	echo "${prog}: No start policy file specified." >&2
+    fi
+    
+    cd "${BROLOGS}" || exit 6
+
+    echo -n $"Starting $prog: "
+
+    "${exec}" ${cmd_opts} >> "${info_file}" 2>&1 &
+    
+    retval=$?
+    newpid=$!
+
+    if [ "${retval}" = '0' -o -z "${retval}" ]; then
+	for ((i=1; i < 11; i++)); do
+            if [ -f "${info_file}" ]; then
+                if [ -n "$(grep -E '^listening on' "${info_file}")" ]; then
+                    break
+                fi
+            fi
+	    
+            # break now if the process returned a non-zero value
+            if [ -n "${retval}" -a "${retval}" != '0' ]; then
+                break
+            fi
+            sleep 1
+        done
+    fi
+
+    if [ "${retval}" != '0' ]; then
+	${syslog_cmd} -t "${prog}" "Bro has failed to start."
+    else
+	${syslog_cmd} -t "${prog}" "Bro process (${newpid}) has started"
+    fi
+    
+    if [ $retval -eq 0 ]; then
+    	 touch $lockfile
+    	 success
+    else
+    	 failure
+    fi
+    
+    echo
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    # run checks to determine if the service is running or use generic status
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+esac
+exit $?

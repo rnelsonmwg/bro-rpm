@@ -1,0 +1,21 @@
+diff -up bro-20080804/configure.in.orig bro-20080804/configure.in
+--- bro-20080804/configure.in.orig	2008-08-08 15:18:40.000000000 +0200
++++ bro-20080804/configure.in	2008-08-08 15:19:34.000000000 +0200
+@@ -272,7 +272,7 @@ AM_CONDITIONAL(USE_NMALLOC, false)
+ 
+ dnl Our resolver tests below include an absolute libray location.
+ dnl This is its default, it may be changed for some OSs.
+-bro_absolute_libresolv="/usr/lib/libresolv.a"
++bro_absolute_libresolv=""
+ 
+ case "$target_os" in
+ 
+@@ -319,7 +319,7 @@ linux*)
+             AC_MSG_ERROR(version 2 or higher required; see the INSTALL doc for more info)
+ 	fi
+         if test "a$build_cpu" = "ax86_64"; then
+-           bro_absolute_libresolv="/usr/lib64/libresolv.a"
++           bro_absolute_libresolv=""
+         fi
+ 	;;
+ 
