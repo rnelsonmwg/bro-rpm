@@ -3,7 +3,7 @@
 Summary: Open-source, Unix-based Network Intrusion Detection System
 Name: bro
 Version: 1.4
-Release: 0.1.%{snapshot}svn%{?dist}
+Release: 0.2.%{snapshot}svn%{?dist}
 License: BSD
 Group: Applications/Internet
 URL: http://bro-ids.org
@@ -18,6 +18,7 @@ Source1: bro-%{snapshot}.cfg
 Source2: bro-%{snapshot}.rc
 Patch0: bro-%{snapshot}-installpolicy.patch
 Patch1: bro-%{snapshot}-configurein.patch
+Patch2: bro-20080804-configure-opt-check.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libpcap-devel openssl-devel zlib-devel ncurses-devel automake autoconf libtool flex bison file-devel bind-devel
@@ -40,6 +41,7 @@ connecting to certain services, or patterns of failed connection attempts).
 %setup -q -n %{name}-%{snapshot}
 %patch0 -p1 -b .installpolicy
 %patch1 -p1 -b .configurein
+%patch2 -p1 -b .optcheck
 
 %build
 ./autogen.sh
@@ -113,5 +115,10 @@ fi
 %{_localstatedir}/lib/bro
 
 %changelog
+
+* Tue Aug 26 2008 Daniel Kopecek <dkopecek@redhat.com> - 1.4-0.2.20080804svn
+- Added patch to prevent collision with the internal
+  variable in Autoconf 2.62. Thanks to skasal@redhat.com.
+
 * Wed May  7 2008 Daniel Kopecek <dkopecek@redhat.com> - 1.4-0.1.20080804svn
 - Initial build.
