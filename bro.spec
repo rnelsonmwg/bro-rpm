@@ -3,7 +3,7 @@
 Summary: Open-source, Unix-based Network Intrusion Detection System
 Name: bro
 Version: 1.4
-Release: 0.2.%{snapshot}svn%{?dist}
+Release: 0.3.%{snapshot}svn%{?dist}
 License: BSD
 Group: Applications/Internet
 URL: http://bro-ids.org
@@ -115,6 +115,8 @@ fi
 %{_localstatedir}/lib/bro
 
 %changelog
+* Thu Jan 15 2009 Tomas Mraz <tmraz@redhat.com> - 1.4-0.3.20080804svn
+- rebuild with new openssl
 
 * Tue Aug 26 2008 Daniel Kopecek <dkopecek@redhat.com> - 1.4-0.2.20080804svn
 - Added patch to prevent collision with the internal
