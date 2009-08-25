@@ -24,7 +24,7 @@ diff -up bro-20080804/src/X509.cc.openssl bro-20080804/src/X509.cc
  
  	// FIXME: could this break Bro's memory tracking?
 -	sk_pop_free(untrustedCerts, free);
-+	sk_X509_pop_free(untrustedCerts, ((void (*)(X509 *))free);
++	sk_X509_pop_free(untrustedCerts, ((void (*)(X509 *))free));
  
  	return ret;
  	}
