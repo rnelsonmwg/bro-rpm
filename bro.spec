@@ -19,6 +19,7 @@ Source2: bro-%{snapshot}.rc
 Patch0: bro-%{snapshot}-installpolicy.patch
 Patch1: bro-%{snapshot}-configurein.patch
 Patch2: bro-20080804-configure-opt-check.patch
+Patch3: bro-20080804-openssl.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libpcap-devel openssl-devel zlib-devel ncurses-devel automake autoconf libtool flex bison file-devel bind-devel
@@ -42,6 +43,7 @@ connecting to certain services, or patterns of failed connection attempts).
 %patch0 -p1 -b .installpolicy
 %patch1 -p1 -b .configurein
 %patch2 -p1 -b .optcheck
+%patch3 -p1 -b .openssl
 
 %build
 ./autogen.sh
@@ -115,7 +117,7 @@ fi
 %{_localstatedir}/lib/bro
 
 %changelog
-* Fri Aug 21 2009 Tomas Mraz <tmraz@redhat.com> - 1.4-0.6.20080804svn
+* Tue Aug 25 2009 Tomas Mraz <tmraz@redhat.com> - 1.4-0.6.20080804svn
 - rebuilt with new openssl
 
 * Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4-0.5.20080804svn
