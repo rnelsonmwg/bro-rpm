@@ -1,6 +1,36 @@
+diff -up bro-20080804/src/ssl-analyzer.pac.openssl bro-20080804/src/ssl-analyzer.pac
+--- bro-20080804/src/ssl-analyzer.pac.openssl	2007-11-29 08:03:58.000000000 +0100
++++ bro-20080804/src/ssl-analyzer.pac	2009-08-25 13:27:00.000000000 +0200
+@@ -379,7 +379,7 @@ refine analyzer SSLAnalyzer += {
+ 			STACK_OF(X509)* untrusted_certs = 0;
+ 			if ( certificates->size() > 1 )
+ 				{
+-				untrusted_certs = sk_new_null();
++				untrusted_certs = sk_X509_new_null();
+ 				if ( ! untrusted_certs )
+ 					{
+ 					// X509_V_ERR_OUT_OF_MEM;
+@@ -402,7 +402,7 @@ refine analyzer SSLAnalyzer += {
+ 						return false;
+ 						}
+ 
+-					sk_push(untrusted_certs, (char*) pTemp);
++					sk_X509_push(untrusted_certs, pTemp);
+ 					}
+ 				}
+ 
+@@ -414,7 +414,7 @@ refine analyzer SSLAnalyzer += {
+ 				certificate_error(csc.error);
+ 			X509_STORE_CTX_cleanup(&csc);
+ 
+-			sk_pop_free(untrusted_certs, free_X509);
++			sk_X509_pop_free(untrusted_certs, X509_free);
+ 			}
+ 
+ 		X509_free(pCert);
 diff -up bro-20080804/src/X509.cc.openssl bro-20080804/src/X509.cc
 --- bro-20080804/src/X509.cc.openssl	2006-10-07 04:20:48.000000000 +0200
-+++ bro-20080804/src/X509.cc	2009-08-25 12:28:10.000000000 +0200
++++ bro-20080804/src/X509.cc	2009-08-25 13:25:19.000000000 +0200
 @@ -191,7 +191,7 @@ int X509_Cert::verifyChain(Contents_SSL*
  	// but in chain format).
  
@@ -24,7 +54,7 @@ diff -up bro-20080804/src/X509.cc.openssl bro-20080804/src/X509.cc
  
  	// FIXME: could this break Bro's memory tracking?
 -	sk_pop_free(untrustedCerts, free);
-+	sk_X509_pop_free(untrustedCerts, ((void (*)(X509 *))free));
++	sk_X509_pop_free(untrustedCerts, X509_free);
  
  	return ret;
  	}
