@@ -1,0 +1,30 @@
+diff -up bro-1.5.1/aux/broctl/bin/broctl.in.broctlfix bro-1.5.1/aux/broctl/bin/broctl.in
+--- bro-1.5.1/aux/broctl/bin/broctl.in.broctlfix	2010-09-15 16:42:40.600187881 +0200
++++ bro-1.5.1/aux/broctl/bin/broctl.in	2010-09-15 16:42:04.969208957 +0200
+@@ -37,7 +37,7 @@ StandAlone = $STANDALONE
+ # Adjust the PYTHONPATH. (If we're installing the make-wrapper will have already
+ # set it correctly.)
+ if not "BROCTL_INSTALL" in os.environ:
+-    sys.path = [os.path.join(BroBase, "lib/broctl")] + sys.path
++    sys.path = [os.path.join(BroBase, "%LIB_DIR%/broctl")] + sys.path
+ 
+ # We need to add the directory of the Broccoli library files
+ # to the linker's runtime search path. This is hack which 
+@@ -47,7 +47,7 @@ if platform.system() == "Darwin":
+     ldpath = "DYLD_LIBRARY_PATH"
+ 
+ old = os.environ.get(ldpath)
+-dir = os.path.join(BroBase, "lib")
++dir = "%LIB_DIR%"
+ if not old or not dir in old:
+     if old:
+         path = "%s:%s" % (dir, old)
+@@ -708,7 +708,7 @@ from BroControl import control
+ from BroControl import cron
+ from BroControl.config import Config
+ 
+-Config = config.Configuration("etc/broctl.cfg", BroBase, BroDist, Version, StandAlone)
++Config = config.Configuration("%SYSCONF_DIR%/bro/broctl.cfg", BroBase, BroDist, Version, StandAlone)
+ 
+ util.enableSignals()
+ 

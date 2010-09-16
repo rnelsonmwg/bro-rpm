@@ -1,0 +1,9 @@
+diff -up bro-1.5.1/aux/broctl/etc/node.cfg.standalone.in.eth0 bro-1.5.1/aux/broctl/etc/node.cfg.standalone.in
+--- bro-1.5.1/aux/broctl/etc/node.cfg.standalone.in.eth0	2010-09-16 14:14:59.815250965 +0200
++++ bro-1.5.1/aux/broctl/etc/node.cfg.standalone.in	2010-09-16 14:15:08.733261290 +0200
+@@ -6,4 +6,4 @@
+ [bro]
+ type=standalone
+ host=localhost
+-interface=em0
++interface=eth0

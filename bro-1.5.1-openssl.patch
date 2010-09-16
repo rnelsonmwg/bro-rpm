@@ -1,7 +1,7 @@
-diff -up bro-20080804/src/ssl-analyzer.pac.openssl bro-20080804/src/ssl-analyzer.pac
---- bro-20080804/src/ssl-analyzer.pac.openssl	2007-11-29 08:03:58.000000000 +0100
-+++ bro-20080804/src/ssl-analyzer.pac	2009-08-25 13:27:00.000000000 +0200
-@@ -379,7 +379,7 @@ refine analyzer SSLAnalyzer += {
+diff -up bro-1.5.1/src/ssl-analyzer.pac.openssl bro-1.5.1/src/ssl-analyzer.pac
+--- bro-1.5.1/src/ssl-analyzer.pac.openssl	2008-10-13 00:01:26.000000000 +0200
++++ bro-1.5.1/src/ssl-analyzer.pac	2010-09-08 13:36:04.179260819 +0200
+@@ -382,7 +382,7 @@ refine analyzer SSLAnalyzer += {
  			STACK_OF(X509)* untrusted_certs = 0;
  			if ( certificates->size() > 1 )
  				{
@@ -10,7 +10,7 @@ diff -up bro-20080804/src/ssl-analyzer.pac.openssl bro-20080804/src/ssl-analyzer
  				if ( ! untrusted_certs )
  					{
  					// X509_V_ERR_OUT_OF_MEM;
-@@ -402,7 +402,7 @@ refine analyzer SSLAnalyzer += {
+@@ -405,7 +405,7 @@ refine analyzer SSLAnalyzer += {
  						return false;
  						}
  
@@ -19,7 +19,7 @@ diff -up bro-20080804/src/ssl-analyzer.pac.openssl bro-20080804/src/ssl-analyzer
  					}
  				}
  
-@@ -414,7 +414,7 @@ refine analyzer SSLAnalyzer += {
+@@ -417,7 +417,7 @@ refine analyzer SSLAnalyzer += {
  				certificate_error(csc.error);
  			X509_STORE_CTX_cleanup(&csc);
  
@@ -28,10 +28,10 @@ diff -up bro-20080804/src/ssl-analyzer.pac.openssl bro-20080804/src/ssl-analyzer
  			}
  
  		X509_free(pCert);
-diff -up bro-20080804/src/X509.cc.openssl bro-20080804/src/X509.cc
---- bro-20080804/src/X509.cc.openssl	2006-10-07 04:20:48.000000000 +0200
-+++ bro-20080804/src/X509.cc	2009-08-25 13:25:19.000000000 +0200
-@@ -191,7 +191,7 @@ int X509_Cert::verifyChain(Contents_SSL*
+diff -up bro-1.5.1/src/X509.cc.openssl bro-1.5.1/src/X509.cc
+--- bro-1.5.1/src/X509.cc.openssl	2009-06-29 23:43:50.000000000 +0200
++++ bro-1.5.1/src/X509.cc	2010-09-08 13:36:04.180250612 +0200
+@@ -192,7 +192,7 @@ int X509_Cert::verifyChain(Contents_SSL*
  	// but in chain format).
  
  	// Init the stack.
@@ -40,7 +40,7 @@ diff -up bro-20080804/src/X509.cc.openssl bro-20080804/src/X509.cc
  	if ( ! untrustedCerts )
  		{
  		// Internal error allocating stack of untrusted certs.
-@@ -232,7 +232,7 @@ int X509_Cert::verifyChain(Contents_SSL*
+@@ -233,7 +233,7 @@ int X509_Cert::verifyChain(Contents_SSL*
  		else
  			// The remaining certificates (if any) are put into
  			// the list of untrusted certificates
@@ -49,7 +49,7 @@ diff -up bro-20080804/src/X509.cc.openssl bro-20080804/src/X509.cc
  
  		tempLength += certLength + 3;
  		}
-@@ -258,7 +258,7 @@ int X509_Cert::verifyChain(Contents_SSL*
+@@ -259,7 +259,7 @@ int X509_Cert::verifyChain(Contents_SSL*
  	// Free the stack, incuding. contents.
  
  	// FIXME: could this break Bro's memory tracking?

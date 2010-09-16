@@ -23,6 +23,8 @@
 . /etc/rc.d/init.d/functions
 
 exec="/usr/bin/bro"
+broctl="/usr/bin/broctl"
+brohome="/"
 prog="bro"
 config="/etc/sysconfig/bro"
 syslog_cmd="logger"
@@ -42,8 +44,9 @@ dexists () {
 }
 
 start() {
-    [ -x $exec ] || exit 5
-     
+    [ -x $exec ]   || exit 5
+    [ -x $broctl ] || exit 5
+ 
     [[ -f "${config}"         && \
       -w "${BROLOGS}"         && \
       -d "${BRO_BIN_DIR}"     && \
@@ -85,26 +88,27 @@ start() {
 
     echo -n $"Starting $prog: "
 
-    "${exec}" ${cmd_opts} >> "${info_file}" 2>&1 &
+    #"${exec}" ${cmd_opts} >> "${info_file}" 2>&1 &
+    HOME="$brohome" "${broctl}" start >> /dev/null 2>&1
     
     retval=$?
     newpid=$!
 
-    if [ "${retval}" = '0' -o -z "${retval}" ]; then
-	for ((i=1; i < 11; i++)); do
-            if [ -f "${info_file}" ]; then
-                if [ -n "$(grep -E '^listening on' "${info_file}")" ]; then
-                    break
-                fi
-            fi
-	    
-            # break now if the process returned a non-zero value
-            if [ -n "${retval}" -a "${retval}" != '0' ]; then
-                break
-            fi
-            sleep 1
-        done
-    fi
+    #if [ "${retval}" = '0' -o -z "${retval}" ]; then
+    #	for ((i=1; i < 11; i++)); do
+    #        if [ -f "${info_file}" ]; then
+    #            if [ -n "$(grep -E '^listening on' "${info_file}")" ]; then
+    #                break
+    #            fi
+    #        fi
+    #	    
+    #        # break now if the process returned a non-zero value
+    #        if [ -n "${retval}" -a "${retval}" != '0' ]; then
+    #            break
+    #        fi
+    #        sleep 1
+    #    done
+    #fi
 
     if [ "${retval}" != '0' ]; then
 	${syslog_cmd} -t "${prog}" "Bro has failed to start."
@@ -125,7 +129,7 @@ start() {
 
 stop() {
     echo -n $"Stopping $prog: "
-    killproc $prog
+    HOME="$brohome" "${broctl}" stop >> /dev/null 2>&1
     retval=$?
     echo
     [ $retval -eq 0 ] && rm -f $lockfile
@@ -146,8 +150,7 @@ force_reload() {
 }
 
 rh_status() {
-    # run checks to determine if the service is running or use generic status
-    status $prog
+    HOME="$brohome" "${broctl}" status 2>&1 | grep running
 }
 
 rh_status_q() {

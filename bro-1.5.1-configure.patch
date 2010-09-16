@@ -1,0 +1,56 @@
+diff -up bro-1.5.1/configure.orig bro-1.5.1/configure
+--- bro-1.5.1/configure.orig	2009-12-19 00:18:58.000000000 +0100
++++ bro-1.5.1/configure	2010-09-08 13:14:10.555260941 +0200
+@@ -4299,29 +4299,29 @@ else
+   nbdns="yes"
+ fi;
+ 
+-set |
+-	sed -n -e 's/^enable_\([^=]*\)=[^=]*$/\1/p' |
+-	while read var; do
+-	    ok=0
+-        for o in option_checking activemapping binpac broccoli brov6 debug \
+-	expire_dfa_states gtk_doc int64 openssl perftools perl \
+-	select_loop shippedpcap broctl cluster nbdns; do
+-		    if test "${o}" = "${var}" ; then
+-			    ok=1
+-			    break
+-		    fi
+-	    done
+-	    if test ${ok} -eq 0 ; then
+-		    # It's hard to kill configure script from subshell!
+-		    { { echo "$as_me:$LINENO: error: unknown enable option: ${var}" >&5
+-echo "$as_me: error: unknown enable option: ${var}" >&2;}
+-   { (exit 1); exit 1; }; }
+-		    exit 1
+-	    fi
+-	done
+-	if test $? -ne 0 ; then
+-		exit 1
+-	fi
++#set |
++#	sed -n -e 's/^enable_\([^=]*\)=[^=]*$/\1/p' |
++#	while read var; do
++#	    ok=0
++#        for o in option_checking activemapping binpac broccoli brov6 debug \
++#	expire_dfa_states gtk_doc int64 openssl perftools perl \
++#	select_loop shippedpcap broctl cluster nbdns; do
++#		    if test "${o}" = "${var}" ; then
++#			    ok=1
++#			    break
++#		    fi
++#	    done
++#	    if test ${ok} -eq 0 ; then
++#		    # It's hard to kill configure script from subshell!
++#		    { { echo "$as_me:$LINENO: error: unknown enable option: ${var}" >&5
++#echo "$as_me: error: unknown enable option: ${var}" >&2;}
++#   { (exit 1); exit 1; }; }
++#		    exit 1
++#	    fi
++#	done
++#	if test $? -ne 0 ; then
++#		exit 1
++#	fi
+ 
+ 
+ if test "$use_openssl" != "no" -a "$use_openssl" != "NO"; then
