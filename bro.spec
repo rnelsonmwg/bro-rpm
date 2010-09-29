@@ -6,7 +6,7 @@
 Summary: Open-source, Unix-based Network Intrusion Detection System
 Name: bro
 Version: 1.5.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: Applications/Internet
 URL: http://bro-ids.org
@@ -190,6 +190,9 @@ fi
 %{_localstatedir}/spool/bro
 
 %changelog
+* Wed Sep 29 2010 jkeating - 1.5.1-2
+- Rebuilt for gcc bug 634757
+
 * Wed Sep  8 2010 Daniel Kopecek <dkopecek@redhat.com> - 1.5.1-1
 - update to new upstream version
 
