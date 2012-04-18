@@ -6,23 +6,26 @@
 Summary: Open-source, Unix-based Network Intrusion Detection System
 Name: bro
 Version: 1.5.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: Applications/Internet
 URL: http://bro-ids.org
 
 Source0: ftp://bro-ids.org/%{name}-1.5-release.tar.gz
 Source1: bro-1.5.cfg
-Source2: bro-1.5.rc
+Source2: bro.service
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libpcap-devel openssl-devel zlib-devel
 BuildRequires: ncurses-devel libtool flex bison byacc
 BuildRequires: file-devel bind-devel python2-devel python-tools
 
-Requires(post): chkconfig
-Requires(preun): chkconfig
-Requires(preun): initscripts
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
+
+#for triggerun
+Requires(post): systemd-sysv
 
 Patch1: bro-1.5.1-configure.patch
 Patch2: bro-1.5.1-openssl.patch
@@ -100,7 +103,7 @@ rm -rf %{buildroot}
 pushd scripts
 %{__install} -d -m 755 %{buildroot}%{_datadir}/bro/scripts
 %{__install} -c -m 644 bro.rc-hooks.sh  %{buildroot}%{_datadir}/bro/scripts/bro.rc-hooks.sh
-%{__install} -D -c -m 755 %{SOURCE2}    %{buildroot}%{_initrddir}/bro
+%{__install} -D -c -m 644 %{SOURCE2}    %{buildroot}%{_unitdir}/bro.service
 
 #%{__install} -c -m 755 mail_reports.sh		%{buildroot}%{_datadir}/bro/scripts/mail_reports.sh
 #%{__install} -c -m 755 mail_notice.sh		%{buildroot}%{_datadir}/bro/scripts/mail_notice.sh
@@ -145,13 +148,35 @@ find "%{buildroot}/" -iname "*.log" -delete;
 rm -rf %{buildroot}
 
 %post
-/sbin/chkconfig --add bro
+if [ $1 -eq 1 ] ; then 
+    # Initial installation 
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
 
 %preun
-if [ $1 = 0 ] ; then
-    /sbin/service bro stop >/dev/null 2>&1
-    /sbin/chkconfig --del bro
+if [ $1 -eq 0 ] ; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable bro.service > /dev/null 2>&1 || :
+    /bin/systemctl stop bro.service > /dev/null 2>&1 || :
 fi
+
+%postun
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    # Package upgrade, not uninstall
+    /bin/systemctl try-restart bro.service >/dev/null 2>&1 || :
+fi
+
+%triggerun -- bro < 1.5.1-5
+# Save the current service runlevel info
+# User must manually run systemd-sysv-convert --apply bro
+# to migrate them to systemd targets
+/usr/bin/systemd-sysv-convert --save bro >/dev/null 2>&1 ||:
+
+# Run these because the SysV package being removed won't do them
+/sbin/chkconfig --del bro >/dev/null 2>&1 || :
+/bin/systemctl try-restart bro.service >/dev/null 2>&1 || :
+
 
 %files
 %defattr(-,root,root,-)
@@ -168,7 +193,7 @@ fi
 %config(noreplace) %{_sysconfdir}/bro/networks.cfg
 %config(noreplace) %{_sysconfdir}/bro/analysis.dat
 
-%{_initrddir}/bro
+%{_unitdir}/bro.service
 
 %{_bindir}/bro
 %{_bindir}/broctl
@@ -190,6 +215,9 @@ fi
 %{_localstatedir}/spool/bro
 
 %changelog
+* Wed Apr 18 2012 Jon Ciesla <limburgher@gmail.com> - 1.5.1-5
+- Migrate to systemd, BZ 771767.
+
 * Thu Jan 12 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.1-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
