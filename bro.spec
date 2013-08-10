@@ -19,6 +19,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libpcap-devel openssl-devel zlib-devel
 BuildRequires: ncurses-devel libtool flex bison byacc
 BuildRequires: file-devel bind-devel python2-devel python-tools
+BuildRequires: systemd-units
 
 Requires(post): systemd-units
 Requires(preun): systemd-units
@@ -217,6 +218,7 @@ fi
 %changelog
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.1-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+- BR: systemd-units for %%{_unitdir} macro definition
 
 * Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 1.5.1-8
 - Perl 5.18 rebuild
