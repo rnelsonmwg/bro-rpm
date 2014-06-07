@@ -6,7 +6,7 @@
 Summary: Open-source, Unix-based Network Intrusion Detection System
 Name: bro
 Version: 1.5.1
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: BSD
 Group: Applications/Internet
 URL: http://bro-ids.org
@@ -216,6 +216,9 @@ fi
 %{_localstatedir}/spool/bro
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.1-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.1-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 - BR: systemd-units for %%{_unitdir} macro definition
