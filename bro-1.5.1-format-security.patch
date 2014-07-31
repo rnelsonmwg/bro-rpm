@@ -1,0 +1,97 @@
+--- a/aux/broctl/aux/pysubnettree/SubnetTree_wrap.cc
++++ b/aux/broctl/aux/pysubnettree/SubnetTree_wrap.cc
+@@ -867,7 +867,7 @@ SWIG_Python_AddErrorMsg(const char* mesg)
+     Py_DECREF(old_str);
+     Py_DECREF(value);
+   } else {
+-    PyErr_Format(PyExc_RuntimeError, mesg);
++    PyErr_Format(PyExc_RuntimeError, "%s", mesg);
+   }
+ }
+ 
+--- a/aux/nftools/ftwire2bro.c
++++ b/aux/nftools/ftwire2bro.c
+@@ -13,7 +13,7 @@
+ #include "nfcommon.h"
+ 
+ void leave (int errlvl, const char *msg) {
+-  fprintf (stderr, msg);
++  fprintf (stderr, "%s", msg);
+   exit (errlvl);
+ }
+ 
+--- a/src/DCE_RPC.cc
++++ b/src/DCE_RPC.cc
+@@ -82,7 +82,7 @@ UUID::UUID(const char* str)
+ 		}
+ 
+ 	if ( i != 16 )
+-		internal_error(fmt("invalid UUID string: %s", str));
++		internal_error("invalid UUID string: %s", str);
+ 	}
+ 
+ typedef map<UUID, BroEnum::dce_rpc_if_id> uuid_map_t;
+--- a/src/PrefixTable.cc
++++ b/src/PrefixTable.cc
+@@ -99,8 +99,8 @@ void* PrefixTable::Lookup(const Val* value, bool exact) const
+ 		break;
+ 
+ 	default:
+-		internal_error(fmt("Wrong index type %d for PrefixTable",
+-					value->Type()->Tag()));
++		internal_error("Wrong index type %d for PrefixTable",
++					value->Type()->Tag());
+ 		return 0;
+ 	}
+ 	}
+--- a/src/RemoteSerializer.cc
++++ b/src/RemoteSerializer.cc
+@@ -2711,7 +2711,7 @@ void RemoteSerializer::InternalCommError(const char* msg)
+ #ifdef DEBUG_COMMUNICATION
+ 	DumpDebugData();
+ #else
+-	internal_error(msg);
++	internal_error("%s", msg);
+ #endif
+ 	}
+ 
+@@ -3061,7 +3061,7 @@ bool SocketComm::ProcessParentMessage()
+ 			}
+ 
+ 		default:
+-			internal_error(fmt("unknown msg type %d", parent_msgtype));
++			internal_error("unknown msg type %d", parent_msgtype);
+ 			return true;
+ 		}
+ 
+--- a/src/SerialObj.cc
++++ b/src/SerialObj.cc
+@@ -47,7 +47,7 @@ void SerialObj::Register(SerialType type, FactoryFunc f, const char* name)
+ 
+ 	FactoryMap::iterator i = factories->find(type);
+ 	if ( i != factories->end() )
+-		internal_error(fmt("SerialType 0x%08x registered twice", type));
++		internal_error("SerialType 0x%08x registered twice", type);
+ 
+ 	(*factories)[type] = f;
+ 	(*names)[type] = name;
+--- a/src/Sessions.cc
++++ b/src/Sessions.cc
+@@ -968,7 +968,7 @@ void NetSessions::Remove(Connection* c)
+ 				;
+ 
+ 			else if ( ! tcp_conns.RemoveEntry(k) )
+-				internal_error(fmt("connection missing"));
++				internal_error("connection missing");
+ 			break;
+ 
+ 		case TRANSPORT_UDP:
+@@ -1354,7 +1354,7 @@ void NetSessions::Internal(const char* msg, const struct pcap_pkthdr* hdr,
+ 				const u_char* pkt)
+ 	{
+ 	DumpPacket(hdr, pkt);
+-	internal_error(msg);
++	internal_error("%s", msg);
+ 	}
+ 
+ void NetSessions::Weird(const char* name,

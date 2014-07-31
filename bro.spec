@@ -6,7 +6,7 @@
 Summary: Open-source, Unix-based Network Intrusion Detection System
 Name: bro
 Version: 1.5.1
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: BSD
 Group: Applications/Internet
 URL: http://bro-ids.org
@@ -33,6 +33,7 @@ Patch2: bro-1.5.1-openssl.patch
 Patch3: bro-1.5.1-etcfix.patch
 Patch4: bro-1.5.1-broctlfix.patch
 Patch5: bro-1.5.1-eth0.patch
+Patch6: bro-1.5.1-format-security.patch
 
 %description
 Bro is an open-source, Unix-based Network Intrusion Detection System (NIDS)
@@ -51,6 +52,7 @@ connecting to certain services, or patterns of failed connection attempts).
 %patch3 -p1 -b .etcfix
 %patch4 -p1 -b .broctlfix
 %patch5 -p1 -b .eth0
+%patch6 -p1 -b .format
 
 b="%{buildroot}"
 
@@ -216,6 +218,9 @@ fi
 %{_localstatedir}/spool/bro
 
 %changelog
+* Thu Jul 31 2014 Yaakov Selkowitz <yselkowi@redhat.com> - 1.5.1-11
+- Fix FTBFS with -Werror=format-security (#1037005, #1106016)
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.1-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
