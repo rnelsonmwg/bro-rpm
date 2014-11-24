@@ -1,0 +1,84 @@
+--- bro-2.3/configure	2014-06-16 16:58:57.000000000 +0200
++++ bro-2.3/configure.new	2014-11-23 18:36:30.870544110 +0100
+@@ -25,6 +25,9 @@
+     --scriptdir=PATH       root installation directory for Bro scripts
+                            [PREFIX/share/bro]
+     --conf-files-dir=PATH  config files installation directory [PREFIX/etc]
++    --python-install-dir   the desired installation directory for
++                           any auxiliary python modules (if present)
++                           [PREFIX/lib/broctl]
+ 
+   Optional Features:
+     --enable-debug         compile in debugging mode
+@@ -34,6 +37,7 @@
+     --enable-perftools-debug use Google's perftools for debugging
+     --enable-jemalloc      link against jemalloc
+     --enable-ruby          build ruby bindings for broccoli (deprecated)
++    --enable-binpac        build binpac
+     --disable-broccoli     don't build or install the Broccoli library
+     --disable-broctl       don't install Broctl
+     --disable-auxtools     don't build or install auxiliary tools
+@@ -129,6 +133,43 @@
+             echo "${usage}" 1>&2
+             exit 1
+             ;;
++        --build=*)
++            ;;
++        --host=*)
++            ;;
++        --program-prefix=*)
++            ;;
++        --disable-dependency-tracking)
++            ;;
++        --exec-prefix=*)
++            ;;
++        --bindir=*)
++            ;;
++        --sbindir=*)
++            ;;
++        --sysconfdir=*)
++            ;;
++        --datadir=*)
++            ;;
++        --includedir=*)
++            ;;
++        --libdir=*)
++            libdir=$optarg
++            append_cache_entry INSTALL_LIB_DIR      PATH   $optarg
++            ;;
++        --libexecdir=*)
++            ;;
++        --localstatedir=*)
++            ;;
++        --sharedstatedir=*)
++            ;;
++        --mandir=*)
++            ;;
++        --infodir=*)
++            ;;
++        --disable-rpath)
++            append_cache_entry CMAKE_SKIP_RPATH         BOOL    true
++            ;;
+         --builddir=*)
+             builddir=$optarg
+             ;;
+@@ -149,6 +190,9 @@
+             append_cache_entry BRO_ETC_INSTALL_DIR PATH $optarg
+             user_set_conffilesdir="true"
+             ;;
++        --python-install-dir=*)
++            append_cache_entry PY_MOD_INSTALL_DIR PATH $optarg
++            ;;
+         --enable-debug)
+             append_cache_entry ENABLE_DEBUG         BOOL   true
+             ;;
+@@ -165,6 +209,9 @@
+         --enable-jemalloc)
+             append_cache_entry ENABLE_JEMALLOC     BOOL   true
+             ;;
++        --enable-binpac)
++            append_cache_entry BinPAC_SKIP_INSTALL  BOOL   false
++            ;;
+         --disable-broccoli)
+             append_cache_entry INSTALL_BROCCOLI     BOOL   false
+             ;;

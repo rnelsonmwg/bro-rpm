@@ -1,0 +1,53 @@
+--- bro-2.3/aux/broctl/configure	2014-08-17 11:02:49.848645878 +0200
++++ bro-2.3/aux/broctl/configure.new	2014-09-17 10:34:44.781882614 +0200
+@@ -80,6 +80,40 @@
+             echo "${usage}" 1>&2
+             exit 1
+             ;;
++        --build=*)
++            ;;
++        --host=*)
++            ;;
++        --program-prefix=*)
++            ;;
++        --disable-dependency-tracking)
++            ;;
++        --exec-prefix=*)
++            ;;
++        --bindir=*)
++            ;;
++        --sbindir=*)
++            ;;
++        --sysconfdir=*)
++            ;;
++        --datadir=*)
++            ;;
++        --includedir=*)
++            ;;
++        --libdir=*)
++            libdir=$optarg
++            append_cache_entry INSTALL_LIB_DIR      PATH   $optarg
++            ;;
++        --libexecdir=*)
++            ;;
++        --localstatedir=*)
++            ;;
++        --sharedstatedir=*)
++            ;;
++        --mandir=*)
++            ;;
++        --infodir=*)
++            ;;
+         --builddir=*)
+             builddir=$optarg
+             ;;
+@@ -112,6 +146,9 @@
+             append_cache_entry PYTHON_INCLUDE_DIR   PATH    $optarg
+             append_cache_entry PYTHON_INCLUDE_PATH  PATH    $optarg
+             ;;
++        --python-install-dir=*)
++            append_cache_entry PY_MOD_INSTALL_DIR PATH $optarg
++            ;;
+         --with-swig=*)
+             append_cache_entry SWIG_EXECUTABLE      PATH    $optarg
+             ;;

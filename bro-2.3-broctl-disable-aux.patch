@@ -1,0 +1,48 @@
+--- bro-2.3/aux/broctl/CMakeLists.txt	2014-06-16 16:59:14.000000000 +0200
++++ bro-2.3/aux/broctl/CMakeLists.txt.new	2014-09-17 21:04:45.908841400 +0200
+@@ -14,27 +14,27 @@
+ 
+ include(FindRequiredPackage)
+ 
+-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/aux/pysubnettree/CMakeLists.txt)
+-    add_subdirectory(aux/pysubnettree)
+-    set(SUBNETTREE_FOUND true)
+-    set(SUBNETTREE_PYTHON_MODULE "build from source aux/pysubnettree")
+-endif ()
+-
+-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/aux/capstats/CMakeLists.txt)
+-    add_subdirectory(aux/capstats)
+-else ()
+-    find_package(Capstats)
+-endif ()
+-
+-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/aux/trace-summary/CMakeLists.txt)
+-    add_subdirectory(aux/trace-summary)
+-else ()
+-    find_package(TraceSummary)
+-endif ()
++#if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/aux/pysubnettree/CMakeLists.txt)
++#    add_subdirectory(aux/pysubnettree)
++#    set(SUBNETTREE_FOUND true)
++#    set(SUBNETTREE_PYTHON_MODULE "build from source aux/pysubnettree")
++#endif ()
++
++#if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/aux/capstats/CMakeLists.txt)
++#    add_subdirectory(aux/capstats)
++#else ()
++#    find_package(Capstats)
++#endif ()
++
++#if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/aux/trace-summary/CMakeLists.txt)
++#    add_subdirectory(aux/trace-summary)
++#else ()
++#    find_package(TraceSummary)
++#endif ()
+ 
+ find_package(Bro)
+ FindRequiredPackage(PythonInterp)
+-FindRequiredPackage(SubnetTree)
++#FindRequiredPackage(SubnetTree)
+ find_package(PCAP)
+ 
+ if (HAVE_PF_RING)

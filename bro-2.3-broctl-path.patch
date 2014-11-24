@@ -1,0 +1,20 @@
+--- bro-2.3/aux/broctl/bin/broctl.in	2014-06-16 16:59:14.000000000 +0200
++++ bro-2.3/aux/broctl/bin/broctl.in.path	2014-06-23 20:16:48.212196292 +0200
+@@ -39,7 +39,7 @@
+         BroScriptDir = tmpbroscriptdir
+ 
+ # Adjust the PYTHONPATH
+-sys.path = [os.path.join(BroBase, "lib/broctl")] + sys.path
++sys.path = [os.path.join(BroBase, "%{_libdir}/broctl")] + sys.path
+ 
+ # We need to add the directory of the Broccoli library files
+ # to the linker's runtime search path. This is hack which
+@@ -49,7 +49,7 @@
+     ldpath = "DYLD_LIBRARY_PATH"
+ 
+ old = os.environ.get(ldpath)
+-dir = os.path.join(BroBase, "lib")
++dir = "%{_libdir}"
+ if not old or dir not in old:
+     if old:
+         path = "%s:%s" % (dir, old)
