@@ -57,4 +57,4 @@ diff -up bro-1.5.1/src/X509.cc.openssl bro-1.5.1/src/X509.cc
 +	sk_X509_pop_free(untrustedCerts, X509_free);
  
  	return ret;
- 	}
+ 	}4'

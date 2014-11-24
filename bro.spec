@@ -1,39 +1,52 @@
-%if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
-%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
-%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
-%endif
+Name:             bro
+Version:          2.3
+Release:          1%{?dist}
+Summary:          A Network Intrusion Detection System and Analysis Framework
 
-Summary: Open-source, Unix-based Network Intrusion Detection System
-Name: bro
-Version: 1.5.1
-Release: 12%{?dist}
-License: BSD
-Group: Applications/Internet
-URL: http://bro-ids.org
+License:          BSD
+URL:              http://bro.org
+Source0:          http://www.bro.org/downloads/release/%{name}-%{version}.tar.gz
+Source1:          bro.service
+Source2:          bro-logrotate.conf
+# Fix for the usage of configure with cmake. This is Fedora specific.
+Patch0:           bro-2.3-configure.patch
+# The aux tools are separate packages. No need to build them.
+Patch1:           bro-2.3-broctl-disable-aux.patch
+# Adjust the paths
+Patch2:           bro-2.3-broctl-path.patch
+Patch3:           bro-1.5.1-format-security.patch
 
-Source0: ftp://bro-ids.org/%{name}-1.5-release.tar.gz
-Source1: bro-1.5.cfg
-Source2: bro.service
+BuildRequires:    cmake
+BuildRequires:    libpcap-devel
+BuildRequires:    openssl-devel
+BuildRequires:    zlib-devel
+BuildRequires:    ncurses-devel
+BuildRequires:    curl-devel
+BuildRequires:    libtool
+BuildRequires:    byacc
+Buildrequires:    swig
+BuildRequires:    bison
+BuildRequires:    flex
+BuildRequires:    file-devel
+BuildRequires:    libxml2-devel
+BuildRequires:    readline-devel
+BuildRequires:    gperftools-devel
+BuildRequires:    bind-devel
+BuildRequires:    jemalloc-devel
+BuildRequires:    python2-devel
+BuildRequires:    python-tools
+BuildRequires:    GeoIP-devel
+BuildRequires:    systemd
+# Unfortunately there is check for sendmail during prep
+#BuildRequires:    sendmail
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: libpcap-devel openssl-devel zlib-devel
-BuildRequires: ncurses-devel libtool flex bison byacc
-BuildRequires: file-devel bind-devel python2-devel python-tools
-BuildRequires: systemd-units
+BuildRequires:    pysubnettree
+BuildRequires:    trace-summary
+BuildRequires:    capstats
 
-Requires(post): systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-
-#for triggerun
-Requires(post): systemd-sysv
-
-Patch1: bro-1.5.1-configure.patch
-Patch2: bro-1.5.1-openssl.patch
-Patch3: bro-1.5.1-etcfix.patch
-Patch4: bro-1.5.1-broctlfix.patch
-Patch5: bro-1.5.1-eth0.patch
-Patch6: bro-1.5.1-format-security.patch
+Requires(post):   systemd
+Requires(preun):  systemd
+Requires(postun): systemd
 
 %description
 Bro is an open-source, Unix-based Network Intrusion Detection System (NIDS)
@@ -45,54 +58,130 @@ detection of specific attacks (including those defined by signatures, but also
 those defined in terms of events) and unusual activities (e.g., certain hosts
 connecting to certain services, or patterns of failed connection attempts).
 
+%package -n binpac
+Summary:        A language for protocol parsers
+
+%description -n binpac
+BinPAC is a high level language for describing protocol parsers and generates
+C++ code. It is currently maintained and distributed with the Bro Network
+Security Monitor distribution, however, the generated parsers may be used
+with other programs besides Bro.
+
+%package -n binpac-devel
+Summary:        Development file for binpac
+Requires:       binpac = %{version}-%{release}
+Provides:       binpac-static = %{version}-%{release}
+
+%description -n binpac-devel
+This package contains the header files for binpac.
+
+%package -n broctl
+Summary:          A control tool for bro
+Buildarch:        noarch
+
+%description -n broctl
+BroControl is an interactive interface for managing a Bro installation which
+allows you to, e.g., start/stop the monitoring or update its configuration.
+
+%package -n broccoli
+Summary:          The bro client communication library
+
+Requires:         %{name}-%{version}
+
+%description -n broccoli
+Broccoli is the "Bro client communications library". It allows you to create
+client sensors for the Bro intrusion detection system. Broccoli can speak a
+good subset of the Bro communication protocol, in particular, it can receive
+Bro IDs, send and receive Bro events, and send and receive event requests
+to/from peering Bros. You can currently create and receive values of pure
+types like integers, counters, timestamps, IP addresses, port numbers,
+booleans, and strings.
+
+%package -n broccoli-devel
+Summary:          Development file for broccoli
+
+Requires:         bro = %{version}-%{release}
+Requires:         pkgconfig
+
+%description -n broccoli-devel
+This package contains the header files for broccoli.
+
+%package -n python-broccoli
+Summary:          Python bindings for bro
+
+BuildRequires:    python2-devel
+
+Requires:         %{name}-%{version}
+Requires:         pysubnettree
+Requires:         trace-summary
+Requires:         capstats
+
+%description -n python-broccoli
+This Python module provides bindings for Broccoli, Bro’s client communication
+library.
+
+%package doc
+Summary:          Documentation for bro
+
+BuildRequires:    python-sphinx
+BuildRequires:    doxygen
+BuildRequires:    rsync
+
+%description doc
+This package contains the documentation for bro.
+
 %prep
-%setup -q -n %{name}-%{version}
-%patch1 -p1 -b .configure
-%patch2 -p1 -b .openssl
-%patch3 -p1 -b .etcfix
-%patch4 -p1 -b .broctlfix
-%patch5 -p1 -b .eth0
-%patch6 -p1 -b .format
+%setup -q
+%patch0 -p1 -b .configure
+%patch1 -p1 -b .cmake
+%patch2 -p1 -b .path
+%patch3 -p1 -b .format
 
-b="%{buildroot}"
+# Paths for broctl broctl/bin/broctl.in
+sed -ibak "s|/lib/broctl|%{python2_sitelib}/BroControl|g" aux/broctl/BroControl/options.py
+sed -ibak "s|/lib|%{_libdir}/bro|g" aux/broctl/BroControl/options.py
 
-sed -ibak "s|BRO_BINDIR|$b%{_bindir}|g"					aux/broctl/BroControl/options.py
-sed -ibak "s|BRO_CFGDIR|$b%{_sysconfdir}/bro|g"				aux/broctl/BroControl/options.py
-sed -ibak "s|BRO_SPOOLDIR|$b%{_localstatedir}/spool/bro|g"		aux/broctl/BroControl/options.py
-sed -ibak "s|BRO_POLICYDIR|$b%{_datadir}/bro|g"				aux/broctl/BroControl/options.py
-sed -ibak "s|BRO_LIBDIR|$b%{_libdir}|g"					aux/broctl/BroControl/options.py
-sed -ibak "s|BRO_TMPDIR|$b%{_localstatedir}/spool/bro/tmp|g"		aux/broctl/BroControl/options.py
-sed -ibak "s|BRO_TMPEXECDIR|$b%{_localstatedir}/spool/bro/tmp|g"	aux/broctl/BroControl/options.py
-sed -ibak "s|BRO_STATSDIR|$b%{_localstatedir}/log/bro/stats|g"		aux/broctl/BroControl/options.py
-sed -ibak "s|BRO_LOGDIR|$b%{_localstatedir}/log/bro|g"			aux/broctl/BroControl/options.py
-
-sed -ibak "s|BROCTL_LIBDIR|$b%{_libdir}/broctl|g"				aux/broctl/BroControl/options.py
-sed -ibak "s|BROCTL_TEMPLATEDIR|$b%{_datadir}/broctl/templates|g"		aux/broctl/BroControl/options.py
-sed -ibak "s|BROCTL_STATICDIR|$b%{_datadir}/broctl|g"				aux/broctl/BroControl/options.py
-sed -ibak "s|BROCTL_SCRIPTSDIR|$b%{_datadir}/broctl/scripts|g"			aux/broctl/BroControl/options.py
-sed -ibak "s|BROCTL_POSTPROCDIR|$b%{_datadir}/broctl/scripts/postprocessors|g"	aux/broctl/BroControl/options.py
-sed -ibak "s|BROCTL_HELPERDIR|$b%{_datadir}/broctl/scripts/helpers|g"		aux/broctl/BroControl/options.py
-
-sed -ibak "s|%LIB_DIR%|%{_libdir}|g" 		aux/broctl/bin/broctl.in
-sed -ibak "s|%SYSCONF_DIR%|%{_sysconfdir}|g"	aux/broctl/bin/broctl.in
+# Shebang
+sed -i -e '1i#! /usr/bin/bash' aux/broctl/bin/set-bro-path aux/broctl/bin/helpers/to-bytes.awk
 
 %build
-%configure --enable-brov6 --enable-int64
-
-%{__make}
+%configure \
+    --prefix=%{_prefix} \
+    --libdir=%{_libdir} \
+    --conf-files-dir=%{_sysconfdir}/bro \
+    --python-install-dir=%{python2_sitelib} \
+    --disable-rpath \
+    --enable-debug \
+    --enable-mobile-ipv6 \
+    --enable-jemalloc \
+    --enable-binpac
+make %{?_smp_mflags}
+make doc
+# Fix doc related rpmlint issues
+rm -rf %{_builddir}/%{name}-%{version}/build/doc/sphinx_output/html/.tmp
+rm -rf %{_builddir}/%{name}-%{version}/build/doc/sphinx_output/html/.buildinfo
+rm -rf %{_builddir}/%{name}-%{version}/build/doc/sphinx_output/html/_static/broxygen-extra.js
+find %{_builddir}/%{name}-%{version}/build/doc/ -size 0 -delete
+sed -i "s|\r||g" %{_builddir}/%{name}-%{version}/build/doc/sphinx_output/html/objects.inv
+f="%{_builddir}/%{name}-%{version}/build/doc/sphinx_output/html/objects.inv"
+iconv --from=ISO-8859-1 --to=UTF-8 $f > $f.new && \
+touch -r $f $f.new && \
+mv $f.new $f
 
 %install
-rm -rf %{buildroot}
-%{__make} DESTDIR="%{buildroot}" install
+make install DESTDIR=%{buildroot} INSTALL="install -p"
+
+# Install service file
+%{__install} -D -c -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/bro.service
 
 # Install config
 %{__install} -d -m 755 %{buildroot}%{_sysconfdir}/bro
-%{__install} -D -c -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/sysconfig/bro
 
 # Create runtime dir
 %{__install} -d -m 755 %{buildroot}%{_localstatedir}/run/bro
 
 # Create log dirs
+install -D -m 0644 -p %{SOURCE2} %{buildroot}%{_sysconfdir}/logrotate.d/bro
 %{__install} -d -m 755 %{buildroot}%{_localstatedir}/log/bro
 %{__install} -d -m 755 %{buildroot}%{_localstatedir}/log/bro/archive
 %{__install} -d -m 755 %{buildroot}%{_localstatedir}/log/bro/sorted-logs
@@ -105,119 +194,107 @@ rm -rf %{buildroot}
 # Install scripts
 pushd scripts
 %{__install} -d -m 755 %{buildroot}%{_datadir}/bro/scripts
-%{__install} -c -m 644 bro.rc-hooks.sh  %{buildroot}%{_datadir}/bro/scripts/bro.rc-hooks.sh
-%{__install} -D -c -m 644 %{SOURCE2}    %{buildroot}%{_unitdir}/bro.service
-
-#%{__install} -c -m 755 mail_reports.sh		%{buildroot}%{_datadir}/bro/scripts/mail_reports.sh
-#%{__install} -c -m 755 mail_notice.sh		%{buildroot}%{_datadir}/bro/scripts/mail_notice.sh
-#%{__install} -c -m 755 bro_log_compress.sh	%{buildroot}%{_datadir}/bro/scripts/bro_log_compress.sh
 popd
 
-pushd aux/scripts
-# Excluded host-grep mon-report because they require /bin/csh
-for aux_script in bro-logchk.pl ca-create ca-issue host-to-addrs hot-report ip-grep lock_file mvlog; do
-    %{__install} -c -m 755 ${aux_script} %{buildroot}%{_datadir}/bro/scripts/${aux_script}
-done
-popd
-
-#pushd s2b
-#%{__install} -d -m 755 %{buildroot}%{_datadir}/bro/scripts/s2b
-#%{__install} -c -m 755 snort2bro/snort2bro      %{buildroot}%{_datadir}/bro/scripts/s2b/snort2bro
-#%{__install} -c -m 644 snort2bro/snort2bro.cfg  %{buildroot}%{_datadir}/bro/scripts/s2b/snort2bro.cfg
-#popd
-
+# The signature samples should go into a seperate sub-package if possible
 # Install example signatures, site policy
 %{__install} -D -d -m 755 %{buildroot}%{_localstatedir}/lib/bro/site
 %{__install} -D -d -m 755 %{buildroot}%{_localstatedir}/lib/bro/host
-%{__install} -c -m 644 scripts/s2b/example_bro_files/signatures.sig     %{buildroot}%{_localstatedir}/lib/bro/site/signatures.sig
-%{__install} -c -m 644 scripts/local.lite.bro                           %{buildroot}%{_localstatedir}/lib/bro/site/localhost.bro
 
-# Install broctl
-%{__make} DESTDIR="%{buildroot}" install-broctl
+# Fix broctl python location
+mv %{buildroot}/usr/lib/broctl/BroControl/ %{buildroot}%{python2_sitelib}/BroControl/
+mv %{buildroot}/usr/lib/broctl/plugins %{buildroot}%{python2_sitelib}/BroControl/plugins
 
-rm -rf src/libedit
+# Move static library to default location
+%if %{_arch} == "x86_64"
+mkdir -p %{buildroot}%{_libdir}
+mv %{buildroot}/usr/lib/libbinpac.a %{buildroot}%{_libdir}/libbinpac.a
+%endif
 
-# Fix paths
-sed -i 's|%{buildroot}||g' %{buildroot}%{_libdir}/broctl/BroControl/options.py
-sed -i 's|%{buildroot}||g' %{buildroot}%{_bindir}/broctl
-sed -i 's|lib/broctl|%{_libdir}/broctl|g' %{buildroot}%{_bindir}/broctl
-
-# Remove devel and junk files
-find "%{buildroot}/%_prefix" -iname "*.la" -delete;
-find "%{buildroot}/%_prefix" -iname "*.[ha]"  -delete;
-find "%{buildroot}/" -iname "*.log" -delete;
-
-%clean
-rm -rf %{buildroot}
+# Remove devel, junk, and zero length files
+find "%{buildroot}%{_prefix}" -iname "*.la" -delete;
+#find "%{buildroot}%{_prefix}" -iname "*.[ha]" -delete;
+find "%{buildroot}" -iname "*.log" -delete;
+rm -rf %{buildroot}%{_includedir}/binpac.h.in
 
 %post
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
+/sbin/ldconfig
+%systemd_post bro.service
 
 %preun
-if [ $1 -eq 0 ] ; then
-    # Package removal, not upgrade
-    /bin/systemctl --no-reload disable bro.service > /dev/null 2>&1 || :
-    /bin/systemctl stop bro.service > /dev/null 2>&1 || :
-fi
+%systemd_preun bro.service
 
 %postun
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart bro.service >/dev/null 2>&1 || :
-fi
+%systemd_postun bro.service
 
-%triggerun -- bro < 1.5.1-5
-# Save the current service runlevel info
-# User must manually run systemd-sysv-convert --apply bro
-# to migrate them to systemd targets
-/usr/bin/systemd-sysv-convert --save bro >/dev/null 2>&1 ||:
+%postin -n broccoli
+/sbin/ldconfig
 
-# Run these because the SysV package being removed won't do them
-/sbin/chkconfig --del bro >/dev/null 2>&1 || :
-/bin/systemctl try-restart bro.service >/dev/null 2>&1 || :
+%postin -n broccoli-devel
+/sbin/ldconfig
 
+%postun -n broccoli
+/sbin/ldconfig
+
+%check
+make test
 
 %files
-%defattr(-,root,root,-)
+%doc CHANGES COPYING NEWS README VERSION
+%{_bindir}/bro
+%{_bindir}/bro-cut
+%config(noreplace) %{_sysconfdir}/bro/networks.cfg
+%config(noreplace) %{_sysconfdir}/bro/node.cfg
+%{_unitdir}/bro.service
+%{_datadir}/bro/
 
-%doc README COPYING AUTHORS CHANGES NEWS
-%doc doc/user-manual/BroDir.pdf doc/user-manual/bro-deployment.pdf
-%doc doc/user-manual/Bro-user-manual.pdf doc/quick-start/bro-deployment.pdf
-%doc doc/quick-start/Bro-quick-start.pdf
+%config(noreplace) %{_sysconfdir}/logrotate.d/bro
+#%ghost %{_localstatedir}/run/bro
+%ghost %{_localstatedir}/log/bro
+%ghost %{_localstatedir}/lib/bro
+%ghost %{_localstatedir}/spool/bro
 
-%config(noreplace) %{_sysconfdir}/sysconfig/bro
-%config(noreplace) %{_sysconfdir}/broccoli.conf
+%files -n binpac
+%doc CHANGES COPYING README
+%{_bindir}/binpac
+
+%files -n binpac-devel
+%{_includedir}/binpac*.h
+%{_libdir}/libbinpac.a
+
+%files -n broctl
 %config(noreplace) %{_sysconfdir}/bro/broctl.cfg
 %config(noreplace) %{_sysconfdir}/bro/node.cfg
-%config(noreplace) %{_sysconfdir}/bro/networks.cfg
-%config(noreplace) %{_sysconfdir}/bro/analysis.dat
-
-%{_unitdir}/bro.service
-
-%{_bindir}/bro
 %{_bindir}/broctl
+%{python2_sitelib}/BroControl
+%{_datadir}/broctl/
+
+%files -n broccoli
+%config(noreplace) %{_sysconfdir}/bro/broccoli.conf
+%{_libdir}/libbroccoli.so.*
+
+%files -n broccoli-devel
 %{_bindir}/broccoli-config
-%{_bindir}/capstats
-%{_bindir}/cf
-%{_bindir}/hf
-%{_bindir}/trace-summary
+%{_libdir}/libbroccoli.so
+%{_includedir}/broccoli.h
+%exclude %{_libdir}/libbroccoli.a
 
-%{_libdir}/broctl
-%{_libdir}/libbroccoli.so*
+%files -n python-broccoli
+%{python2_sitelib}/*broccoli*
 
-%{_datadir}/bro
-%{_datadir}/broctl
-
-%{_localstatedir}/run/bro
-%{_localstatedir}/log/bro
-%{_localstatedir}/lib/bro
-%{_localstatedir}/spool/bro
+%files doc
+%doc doc/LICENSE doc/README
+%doc build/doc/sphinx_output/html
 
 %changelog
+* Fri Aug 15 2014 Fabian Affolter <mail@fabian-affolter.ch> - 2.3-1
+- Introduce logrotate
+- Move docs, python bindings, broctl, and broccoli to subpackage
+- Update systemd macros (rhbz#850051)
+- Add ghost (rhbz#656552)
+- capstats, trace-summary, pysubnettree, btest, and binpac are separate packages
+- Update to latest upstream version 2.3 (rhbz#979726)
+
 * Fri Aug 15 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.1-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
