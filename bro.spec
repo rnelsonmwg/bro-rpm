@@ -135,7 +135,7 @@ This package contains the documentation for bro.
 %patch0 -p1 -b .configure
 %patch1 -p1 -b .cmake
 %patch2 -p1 -b .path
-%patch3 -p1 -b .format
+#%patch3 -p1 -b .format
 
 # Paths for broctl broctl/bin/broctl.in
 sed -ibak "s|/lib/broctl|%{python2_sitelib}/BroControl|g" aux/broctl/BroControl/options.py
