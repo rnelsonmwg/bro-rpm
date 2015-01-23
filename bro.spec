@@ -1,5 +1,5 @@
 Name:             bro
-Version:          2.3
+Version:          2.3.1
 Release:          1%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
@@ -287,6 +287,9 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Fri Jan 23 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.1-1
+- Update to latest upstream version 2.3.1 (rhbz#1140090)
+
 * Fri Aug 15 2014 Fabian Affolter <mail@fabian-affolter.ch> - 2.3-1
 - Introduce logrotate
 - Move docs, python bindings, broctl, and broccoli to subpackage
