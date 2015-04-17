@@ -287,7 +287,7 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
-* Tue Mar 03 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.1-1
+* Tue Mar 03 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.2-1
 - Update to latest upstream version 2.3.2
 
 * Fri Jan 23 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.1-1
