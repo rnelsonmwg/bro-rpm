@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.3.2
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD
@@ -206,7 +206,7 @@ mv %{buildroot}/usr/lib/broctl/BroControl/ %{buildroot}%{python2_sitelib}/BroCon
 mv %{buildroot}/usr/lib/broctl/plugins %{buildroot}%{python2_sitelib}/BroControl/plugins
 
 # Move static library to default location
-%if %{_arch} == "x86_64"
+%if 0%{?_lib} != 'lib'
 mkdir -p %{buildroot}%{_libdir}
 mv %{buildroot}/usr/lib/libbinpac.a %{buildroot}%{_libdir}/libbinpac.a
 %endif
@@ -287,6 +287,9 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Mon Apr 20 2015 Marcin Juszkiewicz <mjuszkiewicz@redhat.com> - 2.3.2-2
+- x86-64 is not the only one 64-bit architecture in Fedora
+
 * Tue Mar 03 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.2-1
 - Update to latest upstream version 2.3.2
 
