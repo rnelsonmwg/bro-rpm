@@ -206,7 +206,7 @@ mv %{buildroot}/usr/lib/broctl/BroControl/ %{buildroot}%{python2_sitelib}/BroCon
 mv %{buildroot}/usr/lib/broctl/plugins %{buildroot}%{python2_sitelib}/BroControl/plugins
 
 # Move static library to default location
-%if 0%{?_lib} != 'lib'
+%if 0%{?__isa_bits} == 64
 mkdir -p %{buildroot}%{_libdir}
 mv %{buildroot}/usr/lib/libbinpac.a %{buildroot}%{_libdir}/libbinpac.a
 %endif
@@ -288,7 +288,7 @@ make test
 
 %changelog
 * Mon Apr 20 2015 Marcin Juszkiewicz <mjuszkiewicz@redhat.com> - 2.3.2-2
-- x86-64 is not the only one 64-bit architecture in Fedora
+- x86-64 is not the only one 64-bit architecture in Fedora (rhbz#1213420)
 
 * Tue Mar 03 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.2-1
 - Update to latest upstream version 2.3.2
