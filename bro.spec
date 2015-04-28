@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.3.2
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD
@@ -85,8 +85,7 @@ allows you to, e.g., start/stop the monitoring or update its configuration.
 
 %package -n broccoli
 Summary:          The bro client communication library
-
-Requires:         %{name}-%{version}
+Requires:         bro = %{version}-%{release}
 
 %description -n broccoli
 Broccoli is the "Bro client communications library". It allows you to create
@@ -111,7 +110,7 @@ Summary:          Python bindings for bro
 
 BuildRequires:    python2-devel
 
-Requires:         %{name}-%{version}
+Requires:         bro = %{version}-%{release}
 Requires:         pysubnettree
 Requires:         trace-summary
 Requires:         capstats
@@ -287,6 +286,9 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Tue Apr 28 2015 Peter Robinson <pbrobinson@fedoraproject.org> 2.3.2-3
+- Fix NVR requires
+
 * Mon Apr 20 2015 Marcin Juszkiewicz <mjuszkiewicz@redhat.com> - 2.3.2-2
 - x86-64 is not the only one 64-bit architecture in Fedora (rhbz#1213420)
 
