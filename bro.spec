@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.3.2
-Release:          3%{?dist}
+Release:          4%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD
@@ -47,6 +47,8 @@ BuildRequires:    capstats
 Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
+
+Requires:         broctl
 
 %description
 Bro is an open-source, Unix-based Network Intrusion Detection System (NIDS)
@@ -286,6 +288,9 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Thu May 28 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.2-4
+* Fix requirements (rhbz#1220801)
+
 * Tue Apr 28 2015 Peter Robinson <pbrobinson@fedoraproject.org> 2.3.2-3
 - Fix NVR requires
 
