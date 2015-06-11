@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.3.2
-Release:          4%{?dist}
+Release:          5%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD
@@ -30,7 +30,9 @@ BuildRequires:    flex
 BuildRequires:    file-devel
 BuildRequires:    libxml2-devel
 BuildRequires:    readline-devel
+%ifnarch s390 s390x
 BuildRequires:    gperftools-devel
+%endif
 BuildRequires:    bind-devel
 BuildRequires:    jemalloc-devel
 BuildRequires:    python2-devel
@@ -288,8 +290,11 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Thu Jun 11 2015 Dan Horák <dan[at]danny.cz> - 2.3.2-5
+- gperftools not available on s390(x)
+
 * Thu May 28 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.2-4
-* Fix requirements (rhbz#1220801)
+- Fix requirements (rhbz#1220801)
 
 * Tue Apr 28 2015 Peter Robinson <pbrobinson@fedoraproject.org> 2.3.2-3
 - Fix NVR requires
