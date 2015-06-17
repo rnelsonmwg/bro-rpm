@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.3.2
-Release:          5%{?dist}
+Release:          6%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD
@@ -290,6 +290,9 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.3.2-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Thu Jun 11 2015 Dan Horák <dan[at]danny.cz> - 2.3.2-5
 - gperftools not available on s390(x)
 
