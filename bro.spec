@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.3.2
-Release:          6%{?dist}
+Release:          7%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD
@@ -290,6 +290,9 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Sun Aug 30 2015 Fabian Affolter <mail@fabian-affolter.ch> - 2.3.2-7
+- Rebuild for libjemalloc
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.3.2-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
