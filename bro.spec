@@ -9,11 +9,11 @@ Source0:          http://www.bro.org/downloads/release/%{name}-%{version}.tar.gz
 Source1:          bro.service
 Source2:          bro-logrotate.conf
 # Fix for the usage of configure with cmake. This is Fedora specific.
-Patch0:           bro-2.3-configure.patch
+Patch0:           %{name}-%{version}-configure.patch
 # The aux tools are separate packages. No need to build them.
-Patch1:           bro-2.3-broctl-disable-aux.patch
+Patch1:           %{name}-%{version}-broctl-disable-aux.patch
 # Adjust the paths
-Patch2:           bro-2.3-broctl-path.patch
+#Patch2:           %{name}-%{version}-broctl-path.patch
 Patch3:           bro-1.5.1-format-security.patch
 
 BuildRequires:    cmake
@@ -137,7 +137,7 @@ This package contains the documentation for bro.
 %setup -q
 %patch0 -p1 -b .configure
 %patch1 -p1 -b .cmake
-%patch2 -p1 -b .path
+#%patch2 -p1 -b .path
 #%patch3 -p1 -b .format
 
 # Paths for broctl broctl/bin/broctl.in
