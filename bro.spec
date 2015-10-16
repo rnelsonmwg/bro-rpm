@@ -246,6 +246,8 @@ make test
 %doc CHANGES COPYING NEWS README VERSION
 %{_bindir}/bro
 %{_bindir}/bro-cut
+%{_mandir}/man1/bro-cut.1*
+%{_mandir}/man8/bro.8*
 %config(noreplace) %{_sysconfdir}/bro/networks.cfg
 %config(noreplace) %{_sysconfdir}/bro/node.cfg
 %{_unitdir}/bro.service
@@ -271,6 +273,7 @@ make test
 %{_bindir}/broctl
 %{python2_sitelib}/BroControl
 %{_datadir}/broctl/
+%{_mandir}/man8/broctl.8*
 
 %files -n broccoli
 %config(noreplace) %{_sysconfdir}/bro/broccoli.conf
