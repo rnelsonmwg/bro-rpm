@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.4.1
-Release:          6%{?dist}
+Release:          7%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD
@@ -109,7 +109,8 @@ Requires:         pkgconfig
 %description -n broccoli-devel
 This package contains the header files for broccoli.
 
-%package -n python-broccoli
+%package -n python2-broccoli
+%{?python_provide:%python_provide python2-broccoli}
 Summary:          Python bindings for bro
 
 BuildRequires:    python2-devel
@@ -119,7 +120,7 @@ Requires:         pysubnettree
 Requires:         trace-summary
 Requires:         capstats
 
-%description -n python-broccoli
+%description -n python2-broccoli
 This Python module provides bindings for Broccoli, Bro’s client communication
 library.
 
@@ -285,7 +286,7 @@ make test
 %{_includedir}/broccoli.h
 %exclude %{_libdir}/libbroccoli.a
 
-%files -n python-broccoli
+%files -n python2-broccoli
 %{python2_sitelib}/*broccoli*
 
 %files doc
@@ -293,6 +294,10 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Sat Aug 19 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 2.4.1-7
+- Python 2 binary package renamed to python2-bro
+  See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3
+
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.4.1-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
