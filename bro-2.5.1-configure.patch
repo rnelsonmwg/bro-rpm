@@ -1,0 +1,92 @@
+--- bro-2.5.1/configure	2017-06-26 18:24:37.000000000 -0500
++++ bro-2.5.1/configure.new	2017-09-29 23:43:29.151379740 -0500
+@@ -31,7 +31,12 @@
+                            [PREFIX/spool]
+     --logdir=PATH          when using BroControl, path to store log file
+                            [PREFIX/logs]
++    --distdir=PATH         configures development file expected paths [PWD]
+     --conf-files-dir=PATH  config files installation directory [PREFIX/etc]
++    --python-install-dir   the desired installation directory for
++                           any auxiliary python modules (if present)
++                           [PREFIX/lib/broctl]
++
+
+   Optional Features:
+     --enable-debug         compile in debugging mode
+@@ -43,6 +48,7 @@
+     --enable-ruby          build ruby bindings for broccoli (deprecated)
+     --enable-broker        enable use of the Broker communication library
+                            (requires C++ Actor Framework)
++    --enable-binpac        build binpac
+     --disable-broccoli     don't build or install the Broccoli library
+     --disable-broctl       don't install Broctl
+     --disable-auxtools     don't build or install auxiliary tools
+@@ -150,6 +156,48 @@
+             echo "${usage}" 1>&2
+             exit 1
+             ;;
++
++        --build=*)
++            ;;
++        --host=*)
++            ;;
++        --program-prefix=*)
++            ;;
++        --disable-dependency-tracking)
++            ;;
++        --exec-prefix=*)
++            ;;
++        --bindir=*)
++            ;;
++        --sbindir=*)
++            ;;
++        --sysconfdir=*)
++            ;;
++        --datadir=*)
++            ;;
++        --includedir=*)
++            ;;
++        --libdir=*)
++            libdir=$optarg
++            append_cache_entry INSTALL_LIB_DIR      PATH   $optarg
++            ;;
++        --libexecdir=*)
++            ;;
++        --localstatedir=*)
++            ;;
++        --sharedstatedir=*)
++            ;;
++        --mandir=*)
++            ;;
++        --infodir=*)
++            ;;
++        --disable-rpath)
++            append_cache_entry CMAKE_SKIP_RPATH         BOOL    true
++            ;;
++        --distdir=*)
++            brodist=$optarg
++            append_cache_entry BRO_DIST      PATH   $optarg
++            ;;
+         --builddir=*)
+             builddir=$optarg
+             ;;
+@@ -179,6 +227,9 @@
+         --logdir=*)
+             append_cache_entry BRO_LOG_DIR  PATH   $optarg
+             ;;
++        --python-install-dir=*)
++            append_cache_entry PY_MOD_INSTALL_DIR PATH $optarg
++            ;;
+         --enable-debug)
+             append_cache_entry ENABLE_DEBUG         BOOL   true
+             ;;
+@@ -200,6 +251,9 @@
+             ;;
+         --disable-broker)
+             ;;
++        --enable-binpac)
++            append_cache_entry BinPAC_SKIP_INSTALL  BOOL   false
++            ;;
+         --disable-broccoli)
+             append_cache_entry INSTALL_BROCCOLI     BOOL   false
+             ;;

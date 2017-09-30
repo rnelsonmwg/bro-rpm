@@ -1,44 +1,36 @@
 Name:             bro
-Version:          2.4.1
-Release:          7%{?dist}
+Version:          2.5.1
+Release:          1%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
-License:          BSD
+License:          BSD-3-Clause
 URL:              http://bro.org
-Source0:          http://www.bro.org/downloads/release/%{name}-%{version}.tar.gz
+Source0:          http://www.bro.org/downloads/%{name}-%{version}.tar.gz
 Source1:          bro.service
-Source2:          bro-logrotate.conf
+#Source2:          bro-logrotate.conf
 # Fix for the usage of configure with cmake. This is Fedora specific.
 Patch0:           %{name}-%{version}-configure.patch
 # The aux tools are separate packages. No need to build them.
 Patch1:           %{name}-%{version}-broctl-disable-aux.patch
 # Adjust the paths
 #Patch2:           %{name}-%{version}-broctl-path.patch
-Patch3:           bro-1.5.1-format-security.patch
+#Patch3:           bro-1.5.1-format-security.patch
+Patch4:           %{name}-%{version}-cmake-brodist.patch
+Requires:         bro-core = %{version}-%{release}
+Requires:         broctl = %{version}-%{release}
+Requires:         libbroccoli = %{version}-%{release}
 
-BuildRequires:    cmake
-BuildRequires:    libpcap-devel
-BuildRequires:    openssl-devel
-BuildRequires:    zlib-devel
-BuildRequires:    ncurses-devel
-BuildRequires:    curl-devel
-BuildRequires:    libtool
-BuildRequires:    byacc
-Buildrequires:    swig
-BuildRequires:    bison
-BuildRequires:    flex
-BuildRequires:    file-devel
-BuildRequires:    libxml2-devel
-BuildRequires:    readline-devel
-%ifnarch s390 s390x
-BuildRequires:    gperftools-devel
-%endif
-BuildRequires:    bind-devel
-BuildRequires:    jemalloc-devel
-BuildRequires:    python2-devel
-BuildRequires:    python-tools
-BuildRequires:    GeoIP-devel
-BuildRequires:    systemd
+
+
+#
+#BuildRequires:    ncurses-devel
+#BuildRequires:    curl-devel
+#BuildRequires:    libtool
+#BuildRequires:    byacc
+#BuildRequires:    file-devel
+#BuildRequires:    libxml2-devel
+#BuildRequires:    readline-devel
+#BuildRequires:    systemd
 # Unfortunately there is check for sendmail during prep
 #BuildRequires:    sendmail
 
@@ -62,6 +54,60 @@ detection of specific attacks (including those defined by signatures, but also
 those defined in terms of events) and unusual activities (e.g., certain hosts
 connecting to certain services, or patterns of failed connection attempts).
 
+%package -n bro-core
+Summary:        The core bro installation without broctl
+Requires:       bind-libs
+Requires:       GeoIP
+%ifnarch s390 s390x
+Requires:       gperftools
+%endif
+Requires:       jemalloc
+Requires:       libpcap
+%if 0%{?fedora} >= 26
+Requires:       compat-openssl10
+%else
+Requires:       openssl
+%endif
+Requires:       zlib
+
+BuildRequires:  bind-devel
+BuildRequires:  bison
+BuildRequires:  cmake
+BuildRequires:  flex
+BuildRequires:  GeoIP-devel
+BuildRequires:  gcc-c++
+%ifnarch s390 s390x
+BuildRequires:  gperftools-devel
+%endif
+BuildRequires:  jemalloc-devel
+BuildRequires:  libpcap-devel
+%if 0%{?fedora} >= 26
+BuildRequires:  compat-openssl10-devel
+%else
+BuildRequires:  openssl-devel
+%endif
+BuildRequires:  python2-devel
+BuildRequires:  swig
+BuildRequires:  zlib-devel
+
+%description -n bro-core
+Bro is a powerful network analysis framework that is much different from the
+typical IDS you may know.  While focusing on network security monitoring, Bro
+provides a comprehensive platform for more general network traffic analysis as
+well. Well grounded in more than 15 years of research, Bro has successfully
+bridged the traditional gap between academia and operations since its
+inception. Today, it is relied upon operationally in particular by many
+scientific environments for securing their cyberinfrastructure. Bro's user
+community includes major universities, research labs, supercomputing centers,
+and open-science communities.
+
+%package -n bro-devel
+Summary:        Compile-time generated source files needed to build bro packages
+
+%description -n bro-devel
+Installs the compile-time generated files known as BRODIST needed to build bro
+packages and plugins. The files can be find in /usr/src/%{name}-%{version}.
+
 %package -n binpac
 Summary:        A language for protocol parsers
 
@@ -82,6 +128,25 @@ This package contains the header files for binpac.
 %package -n broctl
 Summary:          A control tool for bro
 Buildarch:        noarch
+BuildRequires:    python-devel
+BuildRequires:    systemd
+BuildRequires:    pysubnettree
+BuildRequires:    trace-summary
+BuildRequires:    capstats
+
+Requires:         python2
+Requires:         bash
+Requires:         pysubnettree
+Requires:         trace-summary
+Requires:         capstats
+Requires:         libbroccoli = %{version}-%{release}
+Requires:         python2-broccoli = %{version}-%{release}
+Requires:         bro-core = %{version}-%{release}
+
+Requires(pre):    /usr/sbin/groupadd, /usr/bin/getent
+Requires(post):   systemd
+Requires(preun):  systemd
+Requires(postun): systemd
 
 %description -n broctl
 BroControl is an interactive interface for managing a Bro installation which
@@ -89,7 +154,18 @@ allows you to, e.g., start/stop the monitoring or update its configuration.
 
 %package -n broccoli
 Summary:          The bro client communication library
-Requires:         bro = %{version}-%{release}
+BuildRequires:    flex
+BuildRequires:    bison
+BuildRequires:    cmake
+BuildRequires:    libpcap-devel
+Requires:         libpcap
+%if 0%{?fedora} >= 26
+BuildRequires:    compat-openssl10-devel
+Requires:         compat-openssl10
+%else
+BuildRequires:    openssl-devel
+Requires:         openssl
+%endif
 
 %description -n broccoli
 Broccoli is the "Bro client communications library". It allows you to create
@@ -140,6 +216,7 @@ This package contains the documentation for bro.
 %patch1 -p1 -b .cmake
 #%patch2 -p1 -b .path
 #%patch3 -p1 -b .format
+%patch4 -p1 -b .cmake
 
 # Paths for broctl broctl/bin/broctl.in
 sed -ibak "s|/lib/broctl|%{python2_sitelib}/BroControl|g" aux/broctl/BroControl/options.py
@@ -152,8 +229,12 @@ sed -i -e '1i#! /usr/bin/bash' aux/broctl/bin/set-bro-path aux/broctl/bin/helper
 %configure \
     --prefix=%{_prefix} \
     --libdir=%{_libdir} \
+    --localstatedir=%{_localstatedir} \
+    --spooldir=%{_localstatedir}/spool/bro \
+    --logdir=%{_localstatedir}/log/bro \
     --conf-files-dir=%{_sysconfdir}/bro \
     --python-install-dir=%{python2_sitelib} \
+    --distdir=%{_usrsrc}/%{name}-%{version} \
     --disable-rpath \
     --enable-debug \
     --enable-mobile-ipv6 \
@@ -175,6 +256,19 @@ mv $f.new $f
 %install
 make install DESTDIR=%{buildroot} INSTALL="install -p"
 
+# Create bro-devel directory
+%{__install} -d -m 755 %{buildroot}%{_usrsrc}/%{name}-%{version}
+
+# Installing developer dist files
+# This may be more than is needed, but skipping docs and compiled objects
+rsync -ptlv --chown=root:root \
+  --exclude=build/aux/binpac \
+  --exclude=build/aux/bro-aux \
+  --exclude=build/doc \
+  --exclude=build/src \
+  --exclude=build/man \
+  ./ %{buildroot}%{_usrsrc}/%{name}-%{version}/
+
 # Install service file
 %{__install} -D -c -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/bro.service
 
@@ -182,10 +276,9 @@ make install DESTDIR=%{buildroot} INSTALL="install -p"
 %{__install} -d -m 755 %{buildroot}%{_sysconfdir}/bro
 
 # Create runtime dir
-%{__install} -d -m 755 %{buildroot}%{_localstatedir}/run/bro
+#%{__install} -d -m 755 %{buildroot}%{_localstatedir}/run/bro
 
 # Create log dirs
-install -D -m 0644 -p %{SOURCE2} %{buildroot}%{_sysconfdir}/logrotate.d/bro
 %{__install} -d -m 755 %{buildroot}%{_localstatedir}/log/bro
 %{__install} -d -m 755 %{buildroot}%{_localstatedir}/log/bro/archive
 %{__install} -d -m 755 %{buildroot}%{_localstatedir}/log/bro/sorted-logs
@@ -243,22 +336,17 @@ rm -rf %{buildroot}%{_includedir}/binpac.h.in
 %check
 make test
 
-%files
+%files -n bro-core
 %doc CHANGES COPYING NEWS README VERSION
 %{_bindir}/bro
+%{_bindir}/bro-config
 %{_bindir}/bro-cut
 %{_mandir}/man1/bro-cut.1*
 %{_mandir}/man8/bro.8*
-%config(noreplace) %{_sysconfdir}/bro/networks.cfg
-%config(noreplace) %{_sysconfdir}/bro/node.cfg
-%{_unitdir}/bro.service
 %{_datadir}/bro/
 
-%config(noreplace) %{_sysconfdir}/logrotate.d/bro
-#%ghost %{_localstatedir}/run/bro
-%ghost %{_localstatedir}/log/bro
-%ghost %{_localstatedir}/lib/bro
-%ghost %{_localstatedir}/spool/bro
+%files -n bro-devel
+%{_usrsrc}/%{name}-%{version}/
 
 %files -n binpac
 %doc CHANGES COPYING README
@@ -271,10 +359,17 @@ make test
 %files -n broctl
 %config(noreplace) %{_sysconfdir}/bro/broctl.cfg
 %config(noreplace) %{_sysconfdir}/bro/node.cfg
+%config(noreplace) %{_sysconfdir}/bro/networks.cfg
+%{_unitdir}/bro.service
+%{_datadir}/broctl/
 %{_bindir}/broctl
 %{python2_sitelib}/BroControl
-%{_datadir}/broctl/
 %{_mandir}/man8/broctl.8*
+
+#%ghost %{_localstatedir}/run/bro
+%ghost %{_localstatedir}/log/bro
+%ghost %{_localstatedir}/lib/bro
+%ghost %{_localstatedir}/spool/bro
 
 %files -n broccoli
 %config(noreplace) %{_sysconfdir}/bro/broccoli.conf
@@ -294,6 +389,12 @@ make test
 %doc build/doc/sphinx_output/html
 
 %changelog
+* Sat Sep 30 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-1
+- Update to latest upstream version 2.5.1
+- Removed logrotate configuration; handled by broctl
+- Split out bro-core package for standlone bro installations
+- Create bro-devel package
+
 * Sat Aug 19 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 2.4.1-7
 - Python 2 binary package renamed to python2-bro
   See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3
