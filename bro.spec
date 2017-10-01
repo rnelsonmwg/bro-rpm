@@ -16,33 +16,11 @@ Patch1:           %{name}-%{version}-broctl-disable-aux.patch
 #Patch2:           %{name}-%{version}-broctl-path.patch
 #Patch3:           bro-1.5.1-format-security.patch
 Patch4:           %{name}-%{version}-cmake-brodist.patch
+Patch5:           %{name}-%{version}-sphinx-bro-ext.patch 
+
 Requires:         bro-core = %{version}-%{release}
 Requires:         broctl = %{version}-%{release}
 Requires:         libbroccoli = %{version}-%{release}
-
-
-
-#
-#BuildRequires:    ncurses-devel
-#BuildRequires:    curl-devel
-#BuildRequires:    libtool
-#BuildRequires:    byacc
-#BuildRequires:    file-devel
-#BuildRequires:    libxml2-devel
-#BuildRequires:    readline-devel
-#BuildRequires:    systemd
-# Unfortunately there is check for sendmail during prep
-#BuildRequires:    sendmail
-
-BuildRequires:    pysubnettree
-BuildRequires:    trace-summary
-BuildRequires:    capstats
-
-Requires(post):   systemd
-Requires(preun):  systemd
-Requires(postun): systemd
-
-Requires:         broctl
 
 %description
 Bro is an open-source, Unix-based Network Intrusion Detection System (NIDS)
@@ -54,6 +32,7 @@ detection of specific attacks (including those defined by signatures, but also
 those defined in terms of events) and unusual activities (e.g., certain hosts
 connecting to certain services, or patterns of failed connection attempts).
 
+################################################################################
 %package -n bro-core
 Summary:        The core bro installation without broctl
 Requires:       bind-libs
@@ -101,6 +80,7 @@ scientific environments for securing their cyberinfrastructure. Bro's user
 community includes major universities, research labs, supercomputing centers,
 and open-science communities.
 
+################################################################################
 %package -n bro-devel
 Summary:        Compile-time generated source files needed to build bro packages
 
@@ -108,6 +88,7 @@ Summary:        Compile-time generated source files needed to build bro packages
 Installs the compile-time generated files known as BRODIST needed to build bro
 packages and plugins. The files can be find in /usr/src/%{name}-%{version}.
 
+################################################################################
 %package -n binpac
 Summary:        A language for protocol parsers
 
@@ -117,6 +98,7 @@ C++ code. It is currently maintained and distributed with the Bro Network
 Security Monitor distribution, however, the generated parsers may be used
 with other programs besides Bro.
 
+################################################################################
 %package -n binpac-devel
 Summary:        Development file for binpac
 Requires:       binpac = %{version}-%{release}
@@ -125,6 +107,7 @@ Provides:       binpac-static = %{version}-%{release}
 %description -n binpac-devel
 This package contains the header files for binpac.
 
+################################################################################
 %package -n broctl
 Summary:          A control tool for bro
 Buildarch:        noarch
@@ -152,6 +135,7 @@ Requires(postun): systemd
 BroControl is an interactive interface for managing a Bro installation which
 allows you to, e.g., start/stop the monitoring or update its configuration.
 
+################################################################################
 %package -n broccoli
 Summary:          The bro client communication library
 BuildRequires:    flex
@@ -176,6 +160,7 @@ to/from peering Bros. You can currently create and receive values of pure
 types like integers, counters, timestamps, IP addresses, port numbers,
 booleans, and strings.
 
+################################################################################
 %package -n broccoli-devel
 Summary:          Development file for broccoli
 
@@ -185,6 +170,7 @@ Requires:         pkgconfig
 %description -n broccoli-devel
 This package contains the header files for broccoli.
 
+################################################################################
 %package -n python2-broccoli
 %{?python_provide:%python_provide python2-broccoli}
 Summary:          Python bindings for bro
@@ -200,6 +186,7 @@ Requires:         capstats
 This Python module provides bindings for Broccoli, Bro’s client communication
 library.
 
+################################################################################
 %package doc
 Summary:          Documentation for bro
 
@@ -210,6 +197,7 @@ BuildRequires:    rsync
 %description doc
 This package contains the documentation for bro.
 
+################################################################################
 %prep
 %setup -q
 %patch0 -p1 -b .configure
@@ -217,6 +205,7 @@ This package contains the documentation for bro.
 #%patch2 -p1 -b .path
 #%patch3 -p1 -b .format
 %patch4 -p1 -b .cmake
+%patch5 -p1 -b .sphinx
 
 # Paths for broctl broctl/bin/broctl.in
 sed -ibak "s|/lib/broctl|%{python2_sitelib}/BroControl|g" aux/broctl/BroControl/options.py
@@ -225,6 +214,7 @@ sed -ibak "s|/lib|%{_libdir}/bro|g" aux/broctl/BroControl/options.py
 # Shebang
 sed -i -e '1i#! /usr/bin/bash' aux/broctl/bin/set-bro-path aux/broctl/bin/helpers/to-bytes.awk
 
+################################################################################
 %build
 %configure \
     --prefix=%{_prefix} \
@@ -253,6 +243,7 @@ iconv --from=ISO-8859-1 --to=UTF-8 $f > $f.new && \
 touch -r $f $f.new && \
 mv $f.new $f
 
+################################################################################
 %install
 make install DESTDIR=%{buildroot} INSTALL="install -p"
 
@@ -261,7 +252,7 @@ make install DESTDIR=%{buildroot} INSTALL="install -p"
 
 # Installing developer dist files
 # This may be more than is needed, but skipping docs and compiled objects
-rsync -ptlv --chown=root:root \
+rsync -ptlv \
   --exclude=build/aux/binpac \
   --exclude=build/aux/bro-aux \
   --exclude=build/doc \
@@ -314,28 +305,29 @@ find "%{buildroot}%{_prefix}" -iname "*.la" -delete;
 find "%{buildroot}" -iname "*.log" -delete;
 rm -rf %{buildroot}%{_includedir}/binpac.h.in
 
-%post
-/sbin/ldconfig
+################################################################################
+%post -n broctl
 %systemd_post bro.service
 
-%preun
+################################################################################
+%preun -n broctl
 %systemd_preun bro.service
 
-%postun
+################################################################################
+%postun -n broctl
 %systemd_postun bro.service
 
-%postin -n broccoli
-/sbin/ldconfig
+################################################################################
+%post -n broccoli -p /sbin/ldconfig
 
-%postin -n broccoli-devel
-/sbin/ldconfig
+################################################################################
+%postun -n broccoli -p /sbin/ldconfig
 
-%postun -n broccoli
-/sbin/ldconfig
-
+################################################################################
 %check
 make test
 
+################################################################################
 %files -n bro-core
 %doc CHANGES COPYING NEWS README VERSION
 %{_bindir}/bro
@@ -345,17 +337,21 @@ make test
 %{_mandir}/man8/bro.8*
 %{_datadir}/bro/
 
+################################################################################
 %files -n bro-devel
 %{_usrsrc}/%{name}-%{version}/
 
+################################################################################
 %files -n binpac
 %doc CHANGES COPYING README
 %{_bindir}/binpac
 
+################################################################################
 %files -n binpac-devel
 %{_includedir}/binpac*.h
 %{_libdir}/libbinpac.a
 
+################################################################################
 %files -n broctl
 %config(noreplace) %{_sysconfdir}/bro/broctl.cfg
 %config(noreplace) %{_sysconfdir}/bro/node.cfg
@@ -371,29 +367,35 @@ make test
 %ghost %{_localstatedir}/lib/bro
 %ghost %{_localstatedir}/spool/bro
 
+################################################################################
 %files -n broccoli
 %config(noreplace) %{_sysconfdir}/bro/broccoli.conf
 %{_libdir}/libbroccoli.so.*
 
+################################################################################
 %files -n broccoli-devel
 %{_bindir}/broccoli-config
 %{_libdir}/libbroccoli.so
 %{_includedir}/broccoli.h
 %exclude %{_libdir}/libbroccoli.a
 
+################################################################################
 %files -n python2-broccoli
 %{python2_sitelib}/*broccoli*
 
+################################################################################
 %files doc
 %doc doc/LICENSE doc/README
 %doc build/doc/sphinx_output/html
 
+################################################################################
 %changelog
-* Sat Sep 30 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-1
+* Sun Oct 1 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-1
 - Update to latest upstream version 2.5.1
 - Removed logrotate configuration; handled by broctl
 - Split out bro-core package for standlone bro installations
 - Create bro-devel package
+- Patched bro sphinx ext for epel7
 
 * Sat Aug 19 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 2.4.1-7
 - Python 2 binary package renamed to python2-bro
