@@ -16,7 +16,7 @@ Patch1:           %{name}-%{version}-broctl-disable-aux.patch
 #Patch2:           %{name}-%{version}-broctl-path.patch
 #Patch3:           bro-1.5.1-format-security.patch
 Patch4:           %{name}-%{version}-cmake-brodist.patch
-Patch5:           %{name}-%{version}-sphinx-bro-ext.patch 
+Patch5:           %{name}-%{version}-sphinx-bro-ext.patch
 
 Requires:         bro-core = %{version}-%{release}
 Requires:         broctl = %{version}-%{release}
@@ -252,13 +252,19 @@ make install DESTDIR=%{buildroot} INSTALL="install -p"
 
 # Installing developer dist files
 # This may be more than is needed, but skipping docs and compiled objects
-rsync -ptlv \
-  --exclude=build/aux/binpac \
-  --exclude=build/aux/bro-aux \
-  --exclude=build/doc \
-  --exclude=build/src \
-  --exclude=build/man \
-  ./ %{buildroot}%{_usrsrc}/%{name}-%{version}/
+mkdir -p %{buildroot}%{_usrsrc}/%{name}-%{version}/
+
+rsync -rptlv \
+    --exclude=*.o \
+    --exclude=*.a \
+    --exclude=*.so \
+    --exclude=build/doc \
+    --exclude=build/man \
+    --exclude=.tmp \
+    --exclude=testing \
+    ./ %{buildroot}%{_usrsrc}/%{name}-%{version}/
+
+find . -type f -exec sed -i 's|%{_builddir}/%{name}-%{version}|%{_usrsrc}/%{name}-%{version}|g' {} \;
 
 # Install service file
 %{__install} -D -c -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/bro.service
