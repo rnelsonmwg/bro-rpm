@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.5.1
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD-3-Clause
@@ -396,6 +396,9 @@ make test
 
 ################################################################################
 %changelog
+* Wed Oct 4 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-2
+- Fixed bro-devel package for use with plugins
+
 * Sun Oct 1 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-1
 - Update to latest upstream version 2.5.1
 - Removed logrotate configuration; handled by broctl
