@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.5.1
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD-3-Clause
@@ -250,10 +250,8 @@ make install DESTDIR=%{buildroot} INSTALL="install -p"
 # Create bro-devel directory
 %{__install} -d -m 755 %{buildroot}%{_usrsrc}/%{name}-%{version}
 
-# Installing developer dist files
-# This may be more than is needed, but skipping docs and compiled objects
+# Copy over devel files, skipping docs and intermediate objects
 mkdir -p %{buildroot}%{_usrsrc}/%{name}-%{version}/
-
 rsync -rptlv \
     --exclude=*.o \
     --exclude=*.a \
@@ -264,7 +262,10 @@ rsync -rptlv \
     --exclude=testing \
     ./ %{buildroot}%{_usrsrc}/%{name}-%{version}/
 
-find . -type f -exec sed -i 's|%{_builddir}/%{name}-%{version}|%{_usrsrc}/%{name}-%{version}|g' {} \;
+# Change the paths to the installed locations
+find %{buildroot}%{_usrsrc}/%{name}-%{version}/ \
+    -type f \
+    -exec sed -i 's|%{_builddir}/%{name}-%{version}|%{_usrsrc}/%{name}-%{version}|g' {} \;
 
 # Install service file
 %{__install} -D -c -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/bro.service
