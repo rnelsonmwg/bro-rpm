@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.5.1
-Release:          3%{?dist}
+Release:          1%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD-3-Clause
@@ -8,19 +8,18 @@ URL:              http://bro.org
 Source0:          http://www.bro.org/downloads/%{name}-%{version}.tar.gz
 Source1:          bro.service
 #Source2:          bro-logrotate.conf
-# Fix for the usage of configure with cmake. This is Fedora specific.
+# Fix for the usage of configure with cmake and rpm build tools
 Patch0:           %{name}-%{version}-configure.patch
 # The aux tools are separate packages. No need to build them.
 Patch1:           %{name}-%{version}-broctl-disable-aux.patch
 # Adjust the paths
-#Patch2:           %{name}-%{version}-broctl-path.patch
-#Patch3:           bro-1.5.1-format-security.patch
-Patch4:           %{name}-%{version}-cmake-brodist.patch
-Patch5:           %{name}-%{version}-sphinx-bro-ext.patch
+Patch2:           %{name}-%{version}-cmake-devel.patch
+# Fix for sphinx on EL7
+Patch3:           %{name}-%{version}-sphinx-bro-ext.patch
 
 Requires:         bro-core = %{version}-%{release}
 Requires:         broctl = %{version}-%{release}
-Requires:         libbroccoli = %{version}-%{release}
+Requires:         broccoli = %{version}-%{release}
 
 %description
 Bro is an open-source, Unix-based Network Intrusion Detection System (NIDS)
@@ -84,6 +83,9 @@ and open-science communities.
 %package -n bro-devel
 Summary:        Compile-time generated source files needed to build bro packages
 
+Requires:  cmake
+Requires:  bro-core = %{version}-%{release}
+
 %description -n bro-devel
 Installs the compile-time generated files known as BRODIST needed to build bro
 packages and plugins. The files can be find in /usr/src/%{name}-%{version}.
@@ -122,7 +124,7 @@ Requires:         bash
 Requires:         pysubnettree
 Requires:         trace-summary
 Requires:         capstats
-Requires:         libbroccoli = %{version}-%{release}
+Requires:         broccoli = %{version}-%{release}
 Requires:         python2-broccoli = %{version}-%{release}
 Requires:         bro-core = %{version}-%{release}
 
@@ -177,7 +179,7 @@ Summary:          Python bindings for bro
 
 BuildRequires:    python2-devel
 
-Requires:         bro = %{version}-%{release}
+Requires:         broccoli = %{version}-%{release}
 Requires:         pysubnettree
 Requires:         trace-summary
 Requires:         capstats
@@ -200,12 +202,11 @@ This package contains the documentation for bro.
 ################################################################################
 %prep
 %setup -q
+
 %patch0 -p1 -b .configure
 %patch1 -p1 -b .cmake
-#%patch2 -p1 -b .path
-#%patch3 -p1 -b .format
-%patch4 -p1 -b .cmake
-%patch5 -p1 -b .sphinx
+%patch2 -p1 -b .cmake
+%patch3 -p1 -b .sphinx
 
 # Paths for broctl broctl/bin/broctl.in
 sed -ibak "s|/lib/broctl|%{python2_sitelib}/BroControl|g" aux/broctl/BroControl/options.py
@@ -260,11 +261,18 @@ rsync -rptlv \
     --exclude=build/man \
     --exclude=.tmp \
     --exclude=testing \
-    ./ %{buildroot}%{_usrsrc}/%{name}-%{version}/
+    %{_builddir}/%{name}-%{version}/ %{buildroot}%{_usrsrc}/%{name}-%{version}/
 
-# Change the paths to the installed locations
+# Override binaries with symlinks
+ln -sf %{_libdir}/libbroccoli.so.5.1.0 %{buildroot}%{_usrsrc}/%{name}-%{version}/build/aux/broccoli/src/libbroccoli.so.5.1.0
+ln -sf %{_bindir}/bro %{buildroot}%{_usrsrc}/%{name}-%{version}/build/src/bro
+ln -sf %{_bindir}/bro-cut %{buildroot}%{_usrsrc}/%{name}-%{version}/build/aux/bro-aux/bro-cut/bro-cut
+ln -sf %{_bindir}/binpac %{buildroot}%{_usrsrc}/%{name}-%{version}/build/aux/binpac/src/binpac
+
+# Change the paths to the installed locations on non-executable files
 find %{buildroot}%{_usrsrc}/%{name}-%{version}/ \
     -type f \
+    ! -perm -111 \
     -exec sed -i 's|%{_builddir}/%{name}-%{version}|%{_usrsrc}/%{name}-%{version}|g' {} \;
 
 # Install service file
@@ -272,9 +280,6 @@ find %{buildroot}%{_usrsrc}/%{name}-%{version}/ \
 
 # Install config
 %{__install} -d -m 755 %{buildroot}%{_sysconfdir}/bro
-
-# Create runtime dir
-#%{__install} -d -m 755 %{buildroot}%{_localstatedir}/run/bro
 
 # Create log dirs
 %{__install} -d -m 755 %{buildroot}%{_localstatedir}/log/bro
@@ -308,7 +313,6 @@ mv %{buildroot}/usr/lib/libbinpac.a %{buildroot}%{_libdir}/libbinpac.a
 
 # Remove devel, junk, and zero length files
 find "%{buildroot}%{_prefix}" -iname "*.la" -delete;
-#find "%{buildroot}%{_prefix}" -iname "*.[ha]" -delete;
 find "%{buildroot}" -iname "*.log" -delete;
 rm -rf %{buildroot}%{_includedir}/binpac.h.in
 
@@ -333,6 +337,10 @@ rm -rf %{buildroot}%{_includedir}/binpac.h.in
 ################################################################################
 %check
 make test
+
+################################################################################
+%files
+%doc CHANGES COPYING NEWS README VERSION
 
 ################################################################################
 %files -n bro-core
@@ -369,7 +377,6 @@ make test
 %{python2_sitelib}/BroControl
 %{_mandir}/man8/broctl.8*
 
-#%ghost %{_localstatedir}/run/bro
 %ghost %{_localstatedir}/log/bro
 %ghost %{_localstatedir}/lib/bro
 %ghost %{_localstatedir}/spool/bro
@@ -397,10 +404,9 @@ make test
 
 ################################################################################
 %changelog
-* Wed Oct 4 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-2
+* Tue Oct 10 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-1
+- Added plugin configure option for bro-devel package
 - Fixed bro-devel package for use with plugins
-
-* Sun Oct 1 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-1
 - Update to latest upstream version 2.5.1
 - Removed logrotate configuration; handled by broctl
 - Split out bro-core package for standlone bro installations
