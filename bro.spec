@@ -225,6 +225,7 @@ sed -i -e '1i#! /usr/bin/bash' aux/broctl/bin/set-bro-path aux/broctl/bin/helper
     --logdir=%{_localstatedir}/log/bro \
     --conf-files-dir=%{_sysconfdir}/bro \
     --python-install-dir=%{python2_sitelib} \
+    --plugindir=%{_libdir}/bro/plugins \
     --distdir=%{_usrsrc}/%{name}-%{version} \
     --disable-rpath \
     --enable-debug \
