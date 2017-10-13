@@ -208,9 +208,12 @@ This package contains the documentation for bro.
 %patch2 -p1 -b .cmake
 %patch3 -p1 -b .sphinx
 
-# Paths for broctl broctl/bin/broctl.in
-sed -ibak "s|/lib/broctl|%{python2_sitelib}/BroControl|g" aux/broctl/BroControl/options.py
-sed -ibak "s|/lib|%{_libdir}/bro|g" aux/broctl/BroControl/options.py
+# Fix the hard-coded paths in BroControl options
+sed -E -i.orig '
+  /("LibDir"|"PluginBroDir")/s|/lib|%{_libdir}|;
+  /LibDirInternal/s|/lib/broctl|%{python2_sitelib}/BroControl|;
+  s|(%{_exec_prefix})+||
+' options.py
 
 # Shebang
 sed -i -e '1i#! /usr/bin/bash' aux/broctl/bin/set-bro-path aux/broctl/bin/helpers/to-bytes.awk
