@@ -1,9 +1,9 @@
 Name:             bro
-Version:          2.5.1
-Release:          1%{?dist}
+Version:          2.5.2
+Release:          2%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
-License:          BSD-3-Clause
+License:          BSD
 URL:              http://bro.org
 Source0:          http://www.bro.org/downloads/%{name}-%{version}.tar.gz
 Source1:          bro.service
@@ -39,7 +39,6 @@ Requires:       GeoIP
 %ifnarch s390 s390x
 Requires:       gperftools
 %endif
-Requires:       jemalloc
 Requires:       libpcap
 %if 0%{?fedora} >= 26
 Requires:       compat-openssl10
@@ -57,7 +56,6 @@ BuildRequires:  gcc-c++
 %ifnarch s390 s390x
 BuildRequires:  gperftools-devel
 %endif
-BuildRequires:  jemalloc-devel
 BuildRequires:  libpcap-devel
 %if 0%{?fedora} >= 26
 BuildRequires:  compat-openssl10-devel
@@ -213,7 +211,7 @@ sed -E -i.orig '
   /("LibDir"|"PluginBroDir")/s|/lib|%{_libdir}|;
   /LibDirInternal/s|/lib/broctl|%{python2_sitelib}/BroControl|;
   s|(%{_exec_prefix})+||
-' options.py
+' aux/broctl/BroControl/options.py
 
 # Shebang
 sed -i -e '1i#! /usr/bin/bash' aux/broctl/bin/set-bro-path aux/broctl/bin/helpers/to-bytes.awk
@@ -233,7 +231,6 @@ sed -i -e '1i#! /usr/bin/bash' aux/broctl/bin/set-bro-path aux/broctl/bin/helper
     --disable-rpath \
     --enable-debug \
     --enable-mobile-ipv6 \
-    --enable-jemalloc \
     --enable-binpac
 make %{?_smp_mflags}
 make doc
@@ -344,17 +341,21 @@ make test
 
 ################################################################################
 %files
-%doc CHANGES COPYING NEWS README VERSION
+%doc CHANGES NEWS README VERSION
+%license COPYING
 
 ################################################################################
 %files -n bro-core
-%doc CHANGES COPYING NEWS README VERSION
+%doc CHANGES NEWS README VERSION
+%license COPYING
 %{_bindir}/bro
 %{_bindir}/bro-config
 %{_bindir}/bro-cut
 %{_mandir}/man1/bro-cut.1*
 %{_mandir}/man8/bro.8*
 %{_datadir}/bro/
+%config(noreplace) %{_datadir}/bro/site/local.bro
+%caps(cap_net_admin,cap_net_raw=pie) %{_bindir}/bro
 
 ################################################################################
 %files -n bro-devel
@@ -362,7 +363,8 @@ make test
 
 ################################################################################
 %files -n binpac
-%doc CHANGES COPYING README
+%doc CHANGES README
+%license COPYING
 %{_bindir}/binpac
 
 ################################################################################
@@ -381,9 +383,15 @@ make test
 %{python2_sitelib}/BroControl
 %{_mandir}/man8/broctl.8*
 
-%ghost %{_localstatedir}/log/bro
-%ghost %{_localstatedir}/lib/bro
-%ghost %{_localstatedir}/spool/bro
+%dir %{_localstatedir}/log/bro/
+%dir %{_localstatedir}/lib/bro/
+%dir %{_localstatedir}/spool/bro/
+%ghost %{_localstatedir}/log/bro/*
+%ghost %{_localstatedir}/lib/bro/*
+%ghost %{_localstatedir}/spool/bro/*
+
+# Needed if user moves the /var/spool/bro directory elsewhere
+%attr(-, bro, bro) %{_datadir}/broctl/scripts/
 
 ################################################################################
 %files -n broccoli
@@ -403,11 +411,20 @@ make test
 
 ################################################################################
 %files doc
-%doc doc/LICENSE doc/README
+%doc doc/README
 %doc build/doc/sphinx_output/html
+%license doc/LICENSE
 
 ################################################################################
 %changelog
+* Tue Nov 7 2017 Derek Ditch <derek@rocknsm.io> 2.5.2-2
+- Moved licenses from doc to license
+- Removed jemalloc in favor of gperftools to fix crash
+
+* Mon Oct 16 2017 Derek Ditch <derek@rocknsm.io> 2.5.2-1
+- Update to latest upstream version 2.5.2
+- 2.5.2 is a security update
+
 * Tue Oct 10 2017 Derek Ditch <derek@rocknsm.io> 2.5.1-1
 - Added plugin configure option for bro-devel package
 - Fixed bro-devel package for use with plugins
