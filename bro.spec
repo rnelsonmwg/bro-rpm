@@ -1,6 +1,6 @@
 Name:             bro
 Version:          2.5.2
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          A Network Intrusion Detection System and Analysis Framework
 
 License:          BSD
@@ -320,6 +320,11 @@ rm -rf %{buildroot}%{_includedir}/binpac.h.in
 ################################################################################
 %post -n broctl
 %systemd_post bro.service
+getent group bro >/dev/null || groupadd -r bro
+getent passwd bro >/dev/null || \
+    useradd -r -g bro -d %{_localstatedir}/lib/bro/ -s /sbin/nologin \
+    -c "System account for Bro service" %{name}
+exit 0
 
 ################################################################################
 %preun -n broctl
@@ -331,9 +336,16 @@ rm -rf %{buildroot}%{_includedir}/binpac.h.in
 
 ################################################################################
 %post -n broccoli -p /sbin/ldconfig
+%if ( 0%{?_undocumented_hack_closes_scriptlets} )
+%postun
+%endif
 
 ################################################################################
 %postun -n broccoli -p /sbin/ldconfig
+%if ( 0%{?_undocumented_hack_closes_scriptlets} )
+%postun
+%endif
+
 
 ################################################################################
 %check
@@ -417,6 +429,10 @@ make test
 
 ################################################################################
 %changelog
+* Mon Nov 20 2017 Derek Ditch <derek@rocknsm.io> 2.5.2-3
+- Adds bro system user and group in broctl \%post script
+- Fixes bug in broccoli \%post scriplets to run ldconfig
+
 * Tue Nov 7 2017 Derek Ditch <derek@rocknsm.io> 2.5.2-2
 - Moved licenses from doc to license
 - Removed jemalloc in favor of gperftools to fix crash
